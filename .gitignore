@@ -1,0 +1,7 @@
+.idea/
+*.pyc
+*.data.json
+*.config.json
+*.log
+var/
+output/

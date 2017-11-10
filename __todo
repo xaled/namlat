@@ -1,0 +1,19 @@
+- mvp:
+    - server/client:
+        - run_flask_service, _pull_client_request, _update_client_request, threadproof
+        - execute_job
+        - load_data
+        - sign_updates, check_signature
+        - apply_updates
+        - check_conflicts, report_conflicts, calculate_commit_id
+    - reporting with url, and type, and data
+    - job templates
+    - basic jobs:
+        - job1: avito
+        - job2: git + sync
+        - job3: disk usage
+        - job4: dirs in desktop
+        - job5: abstract update (+imp, apt-get, git)
+        - job6: wunderlist weekly report
+        - job7: namlat stats: errors, uptime, data usage
+    - next jobs list
