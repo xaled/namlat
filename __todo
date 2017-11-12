@@ -1,8 +1,8 @@
 - mvp:
     - server/client:
         x run_flask_service, _pull_client_request, _update_client_request, threadproof
-        - execute_job
-        - load_data
+        x execute_job (load module)
+        x load_data
         - sign_updates, check_signature
         - apply_updates
         - check_conflicts, report_conflicts, calculate_commit_id

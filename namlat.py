@@ -1,11 +1,22 @@
 #!/usr/bin/python3
 from time import sleep, time
+import os
 import requests
 import json
+import importlib
+from Crypto.PublicKey import RSA
+from kutils.json_min_db import JsonMinConnexion
 import logging
+import namlat_utils as nu
+
+
 
 
 logger = logging.getLogger(__name__)
+dn = os.path.dirname(os.path.realpath(__file__))
+LOGS_PATH = os.path.join(dn,"logs.json")
+DATA_PATH = os.path.join(dn,"data.json")
+CERT_PATH = os.path.join(dn,"private_key.pem")
 SLEEP = 3600
 
 
@@ -24,31 +35,54 @@ def client_main():
 
 
 def execute_job(job):
-    pass  # TODO
+    try:
+        module = importlib.import_module(job['module'])
+        kwargs = dict()
+        for arg in job['args']:
+            if arg['type'] == 'var':
+                kwargs[arg['key']] = nu.path_to_dict(data, arg['path'], address=address)
+            else:
+                kwargs[arg['key']] = arg['value']
+        return module.execute(**kwargs)
+    except:
+        return None  # TODO: log
 
 
 def get_jobs():
     jobs = list()
-    for job_id in data['jobs'][public_key]:
-        job = data['jobs'][public_key][job_id]
+    for job_id in data['jobs'][address]:
+        job = data['jobs'][address][job_id]
         if time() - job['last_executed'] > job['period']:
             jobs.append(job)
     return jobs
 
 
 def load_data():#TODO
-    global logs, data, public_key, cert
-    logs = None
-    data = None
-    public_key = None
-    cert = None
+    global logs, data, address, rsa_key
+    rsa_key = RSA.import_key(open(CERT_PATH).read())
+    address = nu.public_key_address(rsa_key.publickey())
+    logs = JsonMinConnexion(path=LOGS_PATH, template={'commit_ids':[], 'updates':{}})
+    data = JsonMinConnexion(path=DATA_PATH, template={'jobs':{address:{}}, 'config':{address:{}}, 'public_keys':{}})
 
 
-def sign_update(update):#TODO
-    pass
+def sign_update(update):
+    edits = update['edits']
+    data_tosign = json.dumps(edits).encode()
+    update['signature'] = nu.sign_data(rsa_key, data_tosign)
+    update['address'] = address
+    return update
+
+
+def check_signature(update):#TODO
+    rsapubkey = RSA.import_key(data['public_keys'][update['address']].encode())
+    edits = update['edits']
+    data_toverify = json.dumps(edits).encode()
+    return nu.verify_sign(rsapubkey, update['signature'] , data_toverify)
+
 
 def apply_edit(edit):#TODO
     pass
+
 
 def apply_update(update):
     if check_signature(update):
@@ -61,10 +95,6 @@ def apply_update(update):
 def apply_updates_log(updates_log):#TODO
     for commit_id in updates_log['commit_ids']:
         apply_update(updates_log['updates'][commit_id])
-
-
-def check_signature(update):#TODO
-    pass
 
 
 def calculate_commit_id(update):
@@ -80,15 +110,15 @@ def report_conflicts(conflicts):
 
 
 def pull_client():
-    if 'gw' in data['config'][public_key]:
-        updates_log = _pull_client_request(data['config'][public_key]['gw'], logs['commit_ids'][-1])
+    if 'gw' in data['config'][address]:
+        updates_log = _pull_client_request(data['config'][address]['gw'], logs['commit_ids'][-1])
         if updates_log is not None:
             apply_updates_log(updates_log)
 
 
 def update_client(update):
-    if 'gw' in data['config'][public_key]:
-        commit_id = _update_client_request(data['config'][public_key]['gw'], logs['commit_ids'][-1], update)
+    if 'gw' in data['config'][address]:
+        commit_id = _update_client_request(data['config'][address]['gw'], logs['commit_ids'][-1], update)
         if commit_id is not None:
             apply_update(commit_id, update)
     else:
