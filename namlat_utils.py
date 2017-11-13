@@ -14,6 +14,9 @@ def sha256_digest(data):
 def public_key_address(rsapubkey):
     return sha256_digest(rsapubkey.exportKey())[:16]
 
+def commit_id(data):
+    return sha256_digest(data)[:32]
+
 def path_to_dict(data, path, address):
     value = data
     for key in path:

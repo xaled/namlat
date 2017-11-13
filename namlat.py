@@ -73,16 +73,79 @@ def sign_update(update):
     return update
 
 
-def check_signature(update):#TODO
+def check_signature(update):
     rsapubkey = RSA.import_key(data['public_keys'][update['address']].encode())
     edits = update['edits']
     data_toverify = json.dumps(edits).encode()
     return nu.verify_sign(rsapubkey, update['signature'] , data_toverify)
 
 
-def apply_edit(edit):#TODO
-    pass
-
+def apply_edit(edit):  #TODO: transaction pattern
+    verb, path, value = edit['verb'], edit['path'], edit['value']
+    try:
+        parent = nu.path_to_dict(data, path[:-1])
+        key = path[-1]
+        try: old_value = parent[key]
+        except: old_value = None
+    except:
+        return  # TODO: log
+    try:
+        if verb == 'set':
+            parent[key] = value
+        elif verb == 'del':
+            if key in parent:
+                del parent[key]
+        elif verb == 'append':
+            if isinstance(old_value, list):
+                parent[key].append(value)
+            elif old_value is None:
+                parent[key] = [value]
+            else:
+                raise ValueError("Object to append to is not a list")
+        elif verb == 'extend':
+            if isinstance(old_value, list):
+                parent[key].extend(value)
+            elif old_value is None:
+                parent[key] = list(value)
+            else:
+                raise ValueError("Object to extend to is not a list")
+        elif verb == 'update':
+            if isinstance(old_value, dict):
+                parent[key].update(value)
+            elif old_value is None:
+                parent[key] = dict(value)
+            else:
+                raise ValueError("Object to update is not a dict")
+        elif verb == 'remove':
+            if isinstance(old_value, list):
+                if value in old_value:
+                    parent[key].remove(value)
+            elif old_value is None:
+                parent[key] = list()
+            else:
+                raise ValueError("Object to remove from is not a list")
+        elif verb == 'remove-items':
+            if isinstance(old_value, list):
+                for item in value:
+                    if item in old_value:
+                        parent[key].remove(item)
+            elif old_value is None:
+                parent[key] = list()
+            else:
+                raise ValueError("Object to remove from is not a list")
+        elif verb == 'remove-keys':
+            if isinstance(old_value, list):
+                for k in value:
+                    if k in old_value:
+                        del parent[key][k]
+            elif old_value is None:
+                parent[key] = dict()
+            else:
+                raise ValueError("Object to remove from is not a dict")
+        else:
+            pass  # TODO: log
+    except:
+        return  # TODO: log
 
 def apply_update(update):
     if check_signature(update):
@@ -98,14 +161,30 @@ def apply_updates_log(updates_log):#TODO
 
 
 def calculate_commit_id(update):
-    pass
+    data_tohash = logs['commit_ids'][-1].encode() + json.dumps(update).encode()
+    return nu.commit_id(data_tohash)
 
 
-def check_conflicts(old_commit_id, update):
-    return
+def check_conflicts(old_commit_id, new_update):
+    conflicts = list()
+    updates_log = pull_server(old_commit_id)  #TODO: threads & locks?
+    if updates_log is not None:
+        new_update_pathes_processed = list()
+        for e in new_update['edits']:
+            new_update_pathes_processed.append(json.dumps(e['path'])[1:-1])
+        for ci in  updates_log['updates']:
+            u = updates_log['updates'][ci]
+            for e in u['edits']:
+                path_processed = json.dumps(e['path'])[1:-1]
+                for pp in new_update_pathes_processed:
+                    if pp in path_processed or path_processed in pp:
+                        conflict = {'edit':new_update['edits'][new_update_pathes_processed.index(pp)],
+                                    'old_commit_id':old_commit_id, 'older_edit':e, 'older_edit_commit_id':ci}
+                        conflicts.append(conflict)
+    return conflicts
 
 
-def report_conflicts(conflicts):
+def report_conflicts(conflicts):  # TODO: (after report implementation)
     pass
 
 

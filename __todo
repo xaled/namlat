@@ -3,8 +3,8 @@
         x run_flask_service, _pull_client_request, _update_client_request, threadproof
         x execute_job (load module)
         x load_data
-        - sign_updates, check_signature
-        - apply_updates
+        x sign_updates, check_signature
+        x apply_updates
         - check_conflicts, report_conflicts, calculate_commit_id
     - reporting with url, and type, and data
     - job templates
