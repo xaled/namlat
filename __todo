@@ -4,7 +4,7 @@
         x execute_job (load module)
         x load_data
         x sign_updates, check_signature
-        - apply_updates
+        x apply_updates
         - check_conflicts, report_conflicts, calculate_commit_id
     - reporting with url, and type, and data
     - job templates
