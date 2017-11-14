@@ -5,8 +5,13 @@
         x load_data
         x sign_updates, check_signature
         x apply_updates
-        - check_conflicts, report_conflicts, calculate_commit_id
-    - reporting with url, and type, and data
+        x check_conflicts, , calculate_commit_id
+    - reporting with url, and type, and data:
+        x design (rss-stuff report, unique uri, multiple report, report html/types etc...) & td
+        - report job:
+            - report flowchart
+            - report functions
+        - report_conflicts, report_logs& exeptions
     - job templates
     - basic jobs:
         - job1: avito
@@ -16,4 +21,6 @@
         - job5: abstract update (+imp, apt-get, git)
         - job6: wunderlist weekly report
         - job7: namlat stats: errors, uptime, data usage
-    - next jobs list
+    - next jobs list:
+        - desktop and other files monitoring
+        - android integration (su or not to su)
