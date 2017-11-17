@@ -10,8 +10,6 @@ import logging
 import namlat_utils as nu
 
 
-
-
 logger = logging.getLogger(__name__)
 dn = os.path.dirname(os.path.realpath(__file__))
 LOGS_PATH = os.path.join(dn,"logs.json")
@@ -62,7 +60,7 @@ def load_data():#TODO
     rsa_key = RSA.import_key(open(CERT_PATH).read())
     address = nu.public_key_address(rsa_key.publickey())
     logs = JsonMinConnexion(path=LOGS_PATH, template={'commit_ids':[], 'updates':{}})
-    data = JsonMinConnexion(path=DATA_PATH, template={'jobs':{address:{}}, 'config':{address:{}}, 'public_keys':{}})
+    data = JsonMinConnexion(path=DATA_PATH, template={'jobs':{address:{}}, 'config':{address:{}}, 'public_keys':{}, 'new_reports':{address:[]}})
 
 
 def sign_update(update):

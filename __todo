@@ -7,11 +7,19 @@
         x apply_updates
         x check_conflicts, , calculate_commit_id
     - reporting with url, and type, and data:
-        x design (rss-stuff report, unique uri, multiple report, report html/types etc...) & td
+        x design (rss-stuff report, unique uri, multiple report, report html/types etc...) & td *
+        x report helpers *:
+            x report function
+            x create report (class and constructor)
         - report job:
-            - report flowchart
-            - report functions
-        - report_conflicts, report_logs& exeptions
+            x report flowchart *:
+            - report main *
+            - bb code interpreter *
+        - report_conflicts, *
+        - report_logs & exeptions & logging handler for reports *
+    - (hors sujet): classes and constructors:
+        - reports
+        - updates/edits
     - job templates
     - basic jobs:
         - job1: avito
