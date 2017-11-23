@@ -13,13 +13,26 @@
             x create report (class and constructor)
         - report job:
             x report flowchart *:
-            - report main *
+            - report main *:
+                - handler
+                    - what is a handler? class/config/fix
+                    - has_entries, get entries
+                    - classes:
+                        - Mail : - make report & send
+                        - sms : - make report & send
+                        - telegram : - make report & send
+                    - get_report_handlers:
+                        - create instances & singleton
+                - update_new_entries
+                    - for each
+                    - handle routing
             - bb code interpreter *
         - report_conflicts, *
         - report_logs & exeptions & logging handler for reports *
     - (hors sujet): classes and constructors:
         - reports
         - updates/edits
+    - (hors sujet) jsondb style to generate edits (commit vs get_edits + rollback)
     - job templates
     - basic jobs:
         - job1: avito

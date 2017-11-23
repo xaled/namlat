@@ -1,4 +1,3 @@
-from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Signature import PKCS1_v1_5
@@ -14,8 +13,10 @@ def sha256_digest(data):
 def public_key_address(rsapubkey):
     return sha256_digest(rsapubkey.exportKey())[:16]
 
+
 def commit_id(data):
     return sha256_digest(data)[:32]
+
 
 def path_to_dict(data, path, address):
     value = data
