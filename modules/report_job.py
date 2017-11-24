@@ -5,22 +5,29 @@ import namlat_updates as nu
 
 
 logger = _logging.getLogger(__name__)
+context = None
 
 
-def execute(data_pointer):
-    global data
-    data = data_pointer
+def execute():
+    _import_context()
     update_new_entries()
     executed_handlers = []
+    edits = []
     for handler in get_report_handlers():
-        if time.time() > handler.last_execute() + handler['period'] and handler.has_entries():
+        if time.time() > handler.last_execute() + handler.period and handler.has_entries():
             handler.make_report()
             handler.send()
-            executed_handlers.append(handler['name'])
-            #TODO update last_execute and period
+            executed_handlers.append(handler.handler_id)
+            handler.last_execute()
     if len(executed_handlers) > 0:
-        nr.report()  # TODO:
+        nr.report(nu.Update(edits))
     return nu.Update()  # TODO:
+
+
+def _import_context():
+    global context
+    if context is None:
+        from namlat import context
 
 
 def update_new_entries():
@@ -42,7 +49,7 @@ def periodic_handler():
 class Handler:
     def __init__(self, handler_class, period, period_name):
         self.handler_id = handler_class + "_" + period_name
-        self._pointer = data['reports'][self.handler_id]
+        self._pointer = context.data['reports'][self.handler_id]
         self.period = period
         self.period_name = period_name
 

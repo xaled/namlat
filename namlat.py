@@ -17,6 +17,8 @@ LOGS_PATH = os.path.join(dn, "logs.json")
 DATA_PATH = os.path.join(dn, "data.json")
 CERT_PATH = os.path.join(dn, "private_key.pem")
 SLEEP = 3600
+context = None
+logs, data, address, rsa_key = None, None, None, None
 
 
 # TODO log, info, debug, errors, except exc_info, error_report
@@ -57,12 +59,13 @@ def get_jobs():
 
 
 def load_data():
-    global logs, data, address, rsa_key
+    global logs, data, address, rsa_key, context
     rsa_key = RSA.importKey(open(CERT_PATH).read())
     address = nu.public_key_address(rsa_key.publickey())
     logs = JsonMinConnexion(path=LOGS_PATH, template={'commit_ids': [], 'updates': {}})
     data = JsonMinConnexion(path=DATA_PATH, template={'jobs': {address: {}}, 'config': {address: {}}, 'public_keys': {},
                                                       'new_reports': {address: []}})
+    context = NamlatContext(data, address)
 
 
 def apply_edit(edit):  # TODO: transaction pattern
@@ -231,3 +234,14 @@ def update_server(old_commit_id, update):  # TODO
     commit_id = calculate_commit_id(update)
     apply_update(commit_id, update)
     return commit_id
+
+
+class NamlatContext:
+    def __init__(self):
+        self.data = None
+        self.address = None
+
+    def set_context(self, data, address):
+        self.data = data
+        self.address = address
+

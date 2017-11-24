@@ -1,6 +1,7 @@
 import logging as _logging
 
 logger = _logging.getLogger(__name__)
+context = None
 
 
 class Report:
@@ -26,5 +27,12 @@ class Entry:
         self.__dict__['id'] = id_
 
 
-def report(data, address, report_):
-    data['new_reports'][address].append(report_.__dict__)
+def _import_context():
+    global context
+    if context is None:
+        from namlat import context
+
+
+def report(report_):
+    _import_context()
+    context.data['new_reports'][context.address].append(report_.__dict__)

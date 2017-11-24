@@ -15,8 +15,8 @@
             x report flowchart *:
             - report main *:
                 - handler
-                    - what is a handler? class/config/fix
-                    - has_entries, get entries
+                    x what is a handler? class/config/fix
+                    x has_entries, get entries
                     - classes:
                         - Mail : - make report & send
                         - sms : - make report & send
