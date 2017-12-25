@@ -1,23 +1,21 @@
 from Crypto.PublicKey import RSA
 import logging as _logging
 import json
-import namlat_utils as nu
+import namlat.utils as nu
 
 logger = _logging.getLogger(__name__)
 
 
 class Update:
     def __init__(self, edits):
-        self.__dict__ = dict()
-        self.__dict__['edits'] = edits
+        self.edits = edits
 
 
 class Edit:
-    def __init__(self, verb, path, value):
-        self.__dict__ = dict()
-        self.__dict__['verb'] = verb
-        self.__dict__['path'] = path
-        self.__dict__['value'] = value
+    def __init__(self, verb, path, value=None):
+        self.verb = verb
+        self.path = path
+        self.value = value
 
 
 def sign_update(update, rsa_key, address):

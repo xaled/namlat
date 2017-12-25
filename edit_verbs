@@ -1,0 +1,9 @@
+set
+del
+append
+extend
+update
+remove
+remove-items
+remove-keys
+insert

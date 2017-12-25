@@ -29,10 +29,21 @@
             - bb code interpreter *
         - report_conflicts, *
         - report_logs & exeptions & logging handler for reports *
-    - (hors sujet): classes and constructors:
-        - reports
-        - updates/edits
-    - (hors sujet) jsondb style to generate edits (commit vs get_edits + rollback)
+    x (hors sujet): classes and constructors:
+        x reports
+        x updates/edits
+    x (hors sujet) jsondb style to generate edits (commit vs get_edits + rollback)
+    - FIRST RUN:
+        - test job:
+            x job abstract class
+            x pass context in constructor
+            x change job call
+            - report flow and structure
+            - report job class
+            - test job class
+        - review & run
+        - debug
+        -
     - job templates
     - basic jobs:
         - job1: avito
