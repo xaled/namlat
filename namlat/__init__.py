@@ -7,45 +7,98 @@ import requests
 import importlib
 from kutils.json_min_db import JsonMinConnexion
 import logging
+from namlat.utils.edits_dict import EditDict
 import namlat.utils as nu
 import namlat.updates as nup
 
-SLEEP = 3600
-context = None
+
+class NamlatContext:
+    def __init__(self):
+        self.data = None
+        self.address = None
+        self.secret = None
+
+    def set_context(self, data, address, secret):
+        self.data = data
+        self.address = address
+        self.secret = secret
+
+
+SLEEP = 20
+context = NamlatContext()
 logs, data, address, rsa_key = None, None, None, None
+logger = logging.getLogger(__name__)
 
 
 # TODO log, info, debug, errors, except exc_info, error_report
 def client_main(args):
     load_data(args)
     while True:
-        sleep(SLEEP)
         pull_client()
         jobs = get_jobs()
+        logger.debug("len(jobs)=%d", len(jobs))
         for job in jobs:
+            logger.debug("executing job: %s", job)
             update = execute_job(job)
+            job['last_executed'] = time()
+            logger.debug("signing update=%s", update)
             update_signed = nup.sign_update(update, rsa_key, address)
+            logger.debug("sending peer update to gw")
             update_client(update_signed)
             pull_client()
+        logger.info("sleeping for %ds" % SLEEP)
+        sleep(SLEEP)
+
+
+def sync_main(args):
+    pass
+
+
+def create_main(args):
+    global logs, data, address, rsa_key, context, secret
+    for f in [args.data_path, args.secret_path, args.logs_path, args.cert_path]:
+        if os.path.exists(f):
+            if args.force_create:
+                logger.warning("file %s already exists. deleting the file!")
+                os.unlink(f)
+            else:
+                logger.error("file %s already exists",f)
+                return
+    private_key, public_key = nu.generate_keys()
+    with open(args.cert_path,'w') as fou:
+        fou.write(private_key.decode())
+    rsa_key = RSA.importKey(open(args.cert_path).read())
+    address = nu.public_key_address(rsa_key.publickey())
+    logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
+    data = JsonMinConnexion(path=args.data_path, template={'jobs': {address: {}}, 'config': {address: {}},
+                                                           'public_keys': {}, 'new_reports': {address: []}},)
+    secret = JsonMinConnexion(path=args.secret_path, template={})
+    context.set_context(data, address, secret)
+    sync_client()
+    update = new_namla_update(address, public_key)
+    update_signed = nup.sign_update(update, rsa_key, address)
+    update_client(update_signed)
 
 
 def execute_job(job):
-    try:
-        module_ = importlib.import_module(job['module'])
-        class_ = module_.__dict__[job['class']]
-        job_object = class_(job['module'], job['class'])
-        kwargs = dict()
-        for arg in job['args']:
-            if arg['type'] == 'var':
-                kwargs[arg['key']] = nu.path_to_dict(data, arg['path'], address=address)
-            else:
-                kwargs[arg['key']] = arg['value']
-        job_object.kwargs = kwargs
-        job_object.init_job()
-        job_object.execute()
-        return job_object.get_update()
-    except:
-        return None  # TODO: log
+    # try:
+    module_ = importlib.import_module(job['module'])
+    class_ = module_.__dict__[job['class']]
+    job_object = class_(job['module'], job['class'])
+    # kwargs = dict()
+    # for arg in job['args']: # TODO: args that can be references
+    #     if arg['type'] == 'var':
+    #         kwargs[arg['key']] = nu.path_to_dict(data, arg['path'], address=address)
+    #     else:
+    #         kwargs[arg['key']] = arg['value']
+    kwargs = dict(job['args'])
+    job_object.kwargs = kwargs
+    job_object.init_job()
+    job_object.execute()
+    #job_object.finished()
+    return job_object.get_update()
+    # except:
+    #     raise  # TODO: catch, log and continue
 
 
 def get_jobs():
@@ -57,13 +110,10 @@ def get_jobs():
     return jobs
 
 
-
-
-
-
 def pull_client():
     if 'gw' in data['config'][address]:
         updates_log = _pull_client_request(data['config'][address]['gw'], logs['commit_ids'][-1])
+        logger.debug("pull_client received update_log: %s", updates_log)
         if updates_log is not None:
             apply_updates_log(updates_log)
 
@@ -71,26 +121,47 @@ def pull_client():
 def update_client(update):
     if 'gw' in data['config'][address]:
         commit_id = _update_client_request(data['config'][address]['gw'], logs['commit_ids'][-1], update)
+        logger.debug("received commit_id=%s", commit_id)
         if commit_id is not None:
-            apply_update(commit_id, update)
+            apply_update(update, commit_id)
     else:
         commit_id = calculate_commit_id(update)
-        apply_update(commit_id, update)
+        apply_update(update, commit_id)
+
+
+def sync_client():
+    if 'gw' in data['config'][address]:
+        sync_data, sync_logs = _sync_client_server(data['config'][address]['gw'])
+        apply_sync_data(sync_data, sync_logs)
+    else:
+        logger.warning("Client doesn't have a gateway to sync from")
 
 
 def _pull_client_request(server, last_commit_id):
     try:
         resp = requests.post(server+'/namlat/pull', data={'last_commit_id': last_commit_id})
         return json.loads(resp.content)['updates_log']
-    except:
+    except Exception as e:
+        logger.error("Exception while sending pull request to server:%s", server, exc_info=True)
         return None
 
 
 def _update_client_request(server, old_commit_id, update):
     try:
-        resp = requests.post(server+'/namlat/updates', data={'old_commit_id': old_commit_id, 'update': update})
+        resp = requests.post(server+'/namlat/update', data={'old_commit_id': old_commit_id, 'update': json.dumps(update)})
         return json.loads(resp.content)['commit_id']
-    except:
+    except Exception as e:
+        logger.error("Exception while sending pull request to server:%s", server, exc_info=True)
+        return None
+
+
+def _sync_client_server(server):
+    try:
+        resp = requests.get(server+'/namlat/sync')
+        logger.info("received %dB sync data", len(resp.content))
+        return json.loads(resp.content)['sync_data'], json.loads(resp.content)['sync_logs']
+    except Exception as e:
+        logger.error("Exception while sending pull request to server:%s", server, exc_info=True)
         return None
 
 
@@ -107,37 +178,48 @@ def pull_server(last_commit_id):
         return None
 
 
-def update_server(old_commit_id, update):  # TODO
+def update_server(old_commit_id, update):
     if not nup.check_signature(update, data['public_keys']):
-        return  # TODO: log!
+        logger.warning("Bad signature")
+        return
     if logs['commit_ids'][-1] != old_commit_id:
         conflicts = check_conflicts(old_commit_id, update)
         if len(conflicts) != 0:
+            logger.warning("conflicts in update")
             report_conflicts(conflicts)
             return None  # TODO: what to return when fail
     commit_id = calculate_commit_id(update)
-    apply_update(commit_id, update)
+    apply_update(update, commit_id)
     return commit_id
 
 
-class NamlatContext:
-    def __init__(self):
-        self.data = None
-        self.address = None
-
-    def set_context(self, data, address):
-        self.data = data
-        self.address = address
+def sync_server():
+    return data, logs
 
 
 def load_data(args):
-    global logs, data, address, rsa_key, context
-    rsa_key = RSA.importKey(open(args.cert_path).read())
-    address = nu.public_key_address(rsa_key.publickey())
-    logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
-    data = JsonMinConnexion(path=args.data_path, template={'jobs': {address: {}}, 'config': {address: {}}, 'public_keys': {},
-                                                      'new_reports': {address: []}})
-    context = NamlatContext(data, address)
+    try:
+        global logs, data, address, rsa_key, context, secret
+        rsa_key = RSA.importKey(open(args.cert_path).read())
+        address = nu.public_key_address(rsa_key.publickey())
+        logs = JsonMinConnexion(path=args.logs_path, create=False)
+        data = JsonMinConnexion(path=args.data_path, create=False)
+        secret = JsonMinConnexion(path=args.secret_path, create=False)
+        context.set_context(data, address, secret)
+    except Exception:
+        logger.error("Error loading data args=%s", args, exc_info=True)
+        print("if fist time run namlat.py --create name")
+        raise
+
+
+def apply_sync_data(sync_data, sync_logs):
+    global data, logs
+    data.db.clear()
+    data.db.update(sync_data)
+    data.save()
+    logs.db.clear()
+    logs.db.update(sync_logs)
+    logs.save()
 
 
 def apply_edit(edit):  # TODO: transaction pattern
@@ -207,6 +289,9 @@ def apply_edit(edit):  # TODO: transaction pattern
                 parent[key] = dict()
             else:
                 raise ValueError("Object to remove from is not a dict")
+        elif verb == 'clear':
+            if key in parent:
+                parent[key].clear()
         else:
             pass  # TODO: log
     except:
@@ -214,12 +299,14 @@ def apply_edit(edit):  # TODO: transaction pattern
 
 
 def apply_update(update, commit_id):
+    logger.debug("applying update, update=%s, commit_id=%s", update, commit_id)
     if nup.check_signature(update, data['public_keys']):
         for edit in update['edits']:
             apply_edit(edit)
     logs['commit_ids'].append(commit_id)
-    logs['updates'][update['commit_id']] = update
-
+    logs['updates'][commit_id] = update
+    logs.save()
+    data.save()
 
 def apply_updates_log(updates_log):  # TODO
     for commit_id in updates_log['commit_ids']:
@@ -227,7 +314,11 @@ def apply_updates_log(updates_log):  # TODO
 
 
 def calculate_commit_id(update):
-    data_tohash = logs['commit_ids'][-1].encode() + json.dumps(update).encode()
+    if len(logs['commit_ids']) == 0:
+        data_tohash = b''
+    else:
+        data_tohash = logs['commit_ids'][-1].encode()
+    data_tohash += json.dumps(update).encode()
     return nu.commit_id(data_tohash)
 
 
@@ -252,5 +343,15 @@ def check_conflicts(old_commit_id, new_update):
 
 def report_conflicts(conflicts):  # TODO: (after report implementation)
     pass
+
+
+def new_namla_update(address, public_key):
+    edit_data = EditDict(data)
+    edit_data['new_reports'][address] = []
+    edit_data['public_keys'][address] = public_key.decode()
+    edit_data['jobs'][address] = {}
+    edit_data['config'][address] = {}
+    return nup.Update(edit_data.edits)
+
 
 

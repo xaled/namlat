@@ -1,4 +1,6 @@
 from Crypto.Random import get_random_bytes
+from Crypto import Random
+from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
@@ -32,7 +34,7 @@ def sign_data(rsakey, data):
     digest = SHA256.new()
     digest.update(data)
     sign = signer.sign(digest)
-    return b64encode(sign)
+    return b64encode(sign).decode()
 
 
 def verify_sign(rsapubkey, signature, data):
@@ -64,3 +66,17 @@ def decrypt_data(rsakey, session_key_encrypted, nonce, tag, ciphertext):
     data = cipher_aes.decrypt_and_verify(ciphertext, tag)
 
     return data
+
+def generate_keys():
+    rng = Random.new().read
+    rsa = RSA.generate(4096, rng)
+
+    private_key = rsa.exportKey()
+    public_key = rsa.publickey().exportKey()
+
+    return private_key, public_key
+
+
+
+class DummyObject(object):
+    pass

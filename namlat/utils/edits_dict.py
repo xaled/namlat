@@ -68,7 +68,8 @@ class EditDict(object):
         return self.current_dict.__str__()
 
     def clear(self):
-        raise Exception("Not implemented")
+        self.current_dict.clear()
+        self.append_edits(nup.Edit('clear', []))
 
     def get(self, key):
         return self.current_dict.get(key)
@@ -91,7 +92,7 @@ class EditDict(object):
 class EditList(object):
     def __init__(self, original_list, parent=None, key=None):
         self.original_list = original_list
-        self.current_list = self._fill_edit_lsit(original_list)
+        self.current_list = self._fill_edit_list(original_list)
         self.parent = parent
         self.key = key
         self.edits = []
@@ -141,7 +142,8 @@ class EditList(object):
         self.append_edits(nup.Edit('append', [], value))
 
     def clear(self):
-        raise Exception("Not implemented")
+        self.current_list.clear()
+        self.append_edits(nup.Edit('clear', []))
 
     def extend(self, other_list):
         for v in other_list:

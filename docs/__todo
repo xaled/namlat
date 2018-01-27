@@ -38,12 +38,29 @@
             x job abstract class
             x pass context in constructor
             x change job call
-            - report flow and structure
-            - report job class
-            - test job class
-        - review & run
-        - debug
-        -
+            - report flow and structure:
+                x newreportentry and maker
+                x static handlers
+                x process new entries
+            x report job class
+            x handlers
+            x fixes:
+            x test job class
+        x review & run
+        - debug:
+            x sync_client, sync_server, sync_request
+            x secrets db and context
+            - fix first update problem: cannot check signature of unkown host:
+                - accept check signature if update contain new signature
+                - enforce permissions:
+                    - namla writes only on it address
+                    - job writes only on it database + reports
+                    - special permissions (reporting, cleaning)
+                    - on conflict or permission refused:
+                        - log update
+                        - ignore update and rollback
+            - job.start(), + change last executed
+        - review and run
     - job templates
     - basic jobs:
         - job1: avito

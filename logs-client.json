@@ -1,0 +1,597 @@
+{
+   "commit_ids": [
+      "a502c0e717dc7b78905c135d61686fef",
+      "c295d0233ce0d99e9ca3664bbe90b237",
+      "1ac8f7215cf5598caeccb45f10ef1392"
+   ],
+   "updates": {
+      "c295d0233ce0d99e9ca3664bbe90b237": {
+         "address": "9f70134c64270e63",
+         "signature": "gkGuK2yYaI7IgOsA3fTxbaprZ3EgvJyDWNV10SER+6aW5Idyv5HlKs9JLpLkxdWSOPGh0JhlytNyGMlH4D8linmqBUY4ap0DLrF4hG2iiIAHiM4EvMUb7d9ysOe5GpiCCDRa1sLX9YnQYHEDNusTjZKFj5rCWjkk7t7r2DC5UaUwQo8CNvtkX0160jAsXdjsiIFLHmRm6nThT4BzGM+MOWJj8xB9AD7vxoZQhSB6uCjWVxMncmkQBeJj/5HVsg9zX8dDIxPe436+WhiZk2Vks02dcBAUdbW7BWZdNHD46Yz418ZG8EHp/dlPYm8oLKbhJDy7jik1yUBG3EeUQyEWNIrgWGBbEdI4Rs6hIOSTn0bQhtk5IuyXmK77m/OQ5DfN7juuQ3iKYC71cYsxbqa9sQntPuLo9lx/UeMN4tbyQchVGii/DHz4B/S/Z+8R2L9nszYf+XgLAcMhuQyA/2ugAmZJvnSvKBqdU8vuCQry2JwStlnQr+FYqxTs6dI8icawyHqcRYV2nu/VODDKxjUJOao71++cqy3AK2zCTabjgLyQij60rVdDgyyEfXCwToZmMjZ8AXLYyv66SIcpwRqQaCFjhYsBGqXrenDScpiZXyDi2zgJbgOdHJt8aAda9BFo7k727YZsOB1nnErVXNSeQ6wa1hrxSVhVL5M+73aY1aY=",
+         "edits": [
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "d8b0ab92413c447c91a7078a90f5db5f",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/namlat",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "6230cfb4ac5e4f649a575a03bdecb385",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/namlat",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "3bce01d81c464962ae10a545a9f4d018",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled-scrapers",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "56ca03c4e92b4666b638a888d202c864",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/intm",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "960bd394f5f640069fc2df8e96b2dc6d",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/intm",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "e091c5911ef942fdb6cf1d572b45ba72",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/kutils",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "b9283e69f40849049a0ee74d5117e15a",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/kutils",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "df920eb0a3a545b7a54946861446f027",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/wunderous-analytics",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "bbb348791e2a410a87702e2f2f0e94f4",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled.github.io",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "bf55cdbea1984ecbba703c95836b64de",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled.github.io-pelican-source",
+                  "report_module": "namlat.modules.git"
+               }
+            }
+         ]
+      },
+      "1ac8f7215cf5598caeccb45f10ef1392": {
+         "edits": [
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "d63585602df9440d9b889d98d6e7a8e5",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/namlat",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "a87ca736259646b6b7467ec8537fd337",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/namlat",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "b378c03a3e1f49f892b5076bef205a88",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled-scrapers",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "ac4da800806a4056a984ffa489f498e7",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/intm",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "915ae87ea24247e0a7a9d15c4bfed6c4",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/intm",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "7b50adaf6c1d4192afa9f9d59ae0e6ed",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/kutils",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "fad7c553ae7f486f944b98fed5ec61af",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/kutils",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "208ed2ea69b94a6ab4b1f037e8e3ac9e",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/wunderous-analytics",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "83c72d5d2675473cae9d587906815662",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled.github.io",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "b77b20bf3a144f4bae1906f2df94ca54",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled.github.io-pelican-source",
+                  "report_module": "namlat.modules.git"
+               }
+            }
+         ],
+         "signature": "quvTTfnhV2dGOXcUfMULk7mkeLedsSNPZtGjSTzQ+MMZTk9WmZ4xWlC3rGkhAb575O1ZTSyfMFkr/my4TQgKuUFwyBHUNDUOiHxlBZRJmY32tmeZfJFVdFK4ABUNMtgapl4Z1cY5AxNLaxH0+2nZeIFazPc62QiEeclXNqnc57gubHptKd1RQcYqvr6728jQFqQ+tBpa3wKNisZ33ZlnzbmNiTzMjC3N8AphpH32HtL0OR6kEOwYBfDLrSlW/Sz3cc4Q3p+iQIh93JCF436YmdJfVu3NOtq+dchUAyrkYGO6ZSAJm8cwhehfUDYcON9c12hs5BRuWPCPNFrwIIiOzpclar+mZDA+LIz+V6J5J/I7K4OP5ZZ7aWQ1VcRuTmyI2DSN5y2BgZLRkNFyBIccvF4hD1WN/jub6JUq5mY1JoCnD8Eb41YGpd1EWveFt9ZlWvDMx34Zxrxk3mEOzycUmm5hY5ysetCYuy8D4Ht+Yb+vHDkmLIa1pkThv1jrT4xtZkXzk5JXnRrC4rLEoBTXAi5tGFjSAH7ftELZnwtINgx8BbNcii91nKmigD0WXwixZAYq62+kwiuSF4PwZM33iou2vmVe0/4zfnL2UFkfz9Eg7Sz+/lG5jH/DQ6sjvEhT8PpqDCxplXOYUchavsIAHO9lNlfjE9gTG6yFQo6pLuQ=",
+         "address": "9f70134c64270e63"
+      },
+      "a502c0e717dc7b78905c135d61686fef": {
+         "address": "9f70134c64270e63",
+         "signature": "EIKUPtfw3jVPZ9KUQ7x4q1zRwQ1+1EAdodixtavxWEg9LB11OFCkk4/BDpvQCn5v43PTG42htw5S6Sr9ENmBbkeuGyaNZ9XmH7qwfgYFQFDuE/T42ux344hd+Nx9+h1HDzaYMJOaS+mEtwWw4M9iqffwRAl5LcTJwZ5g8pDbCQsMLyXCHLWdKYojWuiAar8E2jfcTDQ/lKDStnnj4U9v8ZXJqtwoxuSj9V4op/HYoRBSWKvZY2r1VUMdskm60SS7HqupTl101MLf1amks3/4Ij2W8+mXrOyN1Xcf+kChhOVjr+as5ClyyTTSEhsNCazLBAx6AdFeIRCX2hHWl5ZVCrQWOF/+BAy+UPxYg2ygepg0LxH3kP200zSdysL4P0bHUcqG+HfnW0Fi0tAL80QYEEgaP88cuLgjV1JW1VMnmU0zpFUEZeki4bIedHMhtpuYJjO9o9YM0UFvr1EodThLoeBHnII82sea9KUsrfUiHqehxKghXwKzEjLmRRnvkaUbYj+JbEd9G0lYx++etJn5FU/g0hFy13gGPuI5WNmFoH5oBTL9DmBvA8pTUVogbB4lJBSErnkdYPE7MwVbQNW0fKepTOslsAvczyO9hzMUcmFuOczAgQDU5IO1VdYpJgCb0na7S4ouGQfVU+MuEVhLiP6AvpXGR+ZSGCJMma+9gSI=",
+         "edits": [
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "9d28f14c193a45c3b0c7b7b8cc62a469",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/namlat",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "994ee319e9724a57abd59ed6d9f1c4ee",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/namlat",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "e6a0e70ad7824b3891e049be1e66c099",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled-scrapers",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "f948c1d5422646d8918c7d579e516c2d",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/intm",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "7428aa4c518049269b21340dc66a48dc",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/intm",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "28e2005b250347ba9857d607a1600e68",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/kutils",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "not all changes are commited",
+                  "entry_id": "f3e81f1f121a4b7a96be902484c2f92b",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/kutils",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "601505399af944c6b41a2f3dc5c62592",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/wunderous-analytics",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "dc6c430dc01c4fdab3f664331203b4e0",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled.github.io",
+                  "report_module": "namlat.modules.git"
+               }
+            },
+            {
+               "path": [
+                  "new_reports",
+                  "9f70134c64270e63"
+               ],
+               "verb": "append",
+               "value": {
+                  "report_title": "Git cron report for host 9f70134c64270e63",
+                  "report_subtitle": "",
+                  "handlers": [
+                     "mail_daily"
+                  ],
+                  "message_body": "",
+                  "entry_id": "a29da216954745b78fe41879a744bc06",
+                  "report_type": "gitstatus",
+                  "title": "/home/xaled/Desktop/xaled.github.io-pelican-source",
+                  "report_module": "namlat.modules.git"
+               }
+            }
+         ]
+      }
+   }
+}
