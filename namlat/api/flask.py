@@ -1,19 +1,22 @@
 from flask import Flask, Response, json, request
 from threading import Lock, Thread
-from namlat import pull_server, update_server, sync_server
+import namlat.api.server as server
 import logging
 logger = logging.getLogger(__name__)
 
-data_lock = Lock()
+data_lock = Lock() # Todo: threadsafe only if there is one server/master that is jobless
 app = Flask(__name__)
 
 
-def app_thread():
+def server_main(args=None):
+    if args is not None:
+        from namlat import load_data
+        load_data(args)
     app.run()
 
 
-def server_main():
-    thread = Thread(target=app_thread)
+def server_main_threaded():
+    thread = Thread(target=server_main)
     thread.setDaemon(True)
     thread.start()
 
@@ -31,7 +34,7 @@ def api_pull():
         data_lock.acquire()
         if 'last_commit_id' in request.form:
             last_commit_id = request.form['last_commit_id']
-            updates_log = pull_server(last_commit_id)
+            updates_log = server.pull(last_commit_id)
             resp_body = json.dumps({"updates_log":updates_log})
             resp = Response(resp_body, status=200, mimetype='application/json')
             return resp
@@ -54,7 +57,7 @@ def api_update():
             old_commit_id = request.form['old_commit_id']
             logger.debug(request.form['update'])
             update = json.loads(request.form['update'])
-            commit_id = update_server(old_commit_id, update)
+            commit_id = server.update(old_commit_id, update)
             logger.debug("returning commit_id=%s", commit_id)
             resp_body = json.dumps({"commit_id":commit_id})
             resp = Response(resp_body, status=200, mimetype='application/json')
@@ -74,9 +77,40 @@ def api_sync():
     logger.debug("received client sync")
     try:
         data_lock.acquire()
-        sync_data, sync_logs = sync_server()
-        resp = Response({'sync_data':sync_data, 'sync_logs':sync_logs}, status=200, mimetype='application/json')
+        sync_data, sync_logs = server.sync()
+        resp_body = json.dumps({'sync_data':sync_data, 'sync_logs':sync_logs})
+        resp = Response(resp_body, status=200, mimetype='application/json')
         return resp
+    except Exception as e:
+        logger.error("error in update request: %s", str(e), exc_info=True)
+        return error_400()
+    finally:
+        data_lock.release()
+
+
+@app.route('/namlat/createNode', methods=['POST'])
+def api_create_node():
+    logger.debug("received client sync")
+    try:
+        data_lock.acquire()
+        if 'gw' in request.form and 'public_key' in request.form and 'address' in request.form \
+                and 'node_name' in request.form:
+            gw = request.form['gw']
+            address = request.form['address']
+            public_key = request.form['public_key']
+            node_name = request.form['node_name']
+            accepted = server.create_node(gw, address, public_key, node_name)
+            if accepted:
+                sync_data, sync_logs = server.sync()
+            else:
+                sync_data, sync_logs = None, None
+            # logger.debug("response: %s", {'accepted': accepted, 'sync_data':sync_data, 'sync_logs':sync_logs})
+            resp_body = json.dumps({'accepted': accepted, 'sync_data':sync_data, 'sync_logs':sync_logs})
+            resp = Response(resp_body, status=200, mimetype='application/json')
+            return resp
+        else:
+            logger.warning("bad parameters!")
+            return error_400()
     except Exception as e:
         logger.error("error in update request: %s", str(e), exc_info=True)
         return error_400()

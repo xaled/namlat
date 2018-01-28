@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 import argparse
-import os
 import logging
+import os
 
 import namlat
-from namlat.namlat_api import server_main
-from namlat.utils import DummyObject
-
+from namlat.api.flask import server_main
+from namlat.config import DATA_DIR
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='namlat - Decentralized monitoring and tasks')
@@ -21,12 +20,12 @@ if __name__ == "__main__":
     parser.add_argument('-C','--cert-path', action="store", default=None)
     parser.add_argument('-D','--data-path', action="store", default=None)
     parser.add_argument('-S','--secret-path', action="store", default=None)
-    parser.add_argument('--data-dir', action="store", default=None)
+    parser.add_argument('--data-dir', action="store", default=DATA_DIR)
 
     args = parser.parse_args()
 
-    if args.data_dir is None:
-        args.data_dir = os.path.dirname(os.path.realpath(__file__))
+    # if args.data_dir is None:
+    #     args.data_dir = os.path.dirname(os.path.realpath(__file__))
     # LOGS_PATH = os.path.join(dn, "logs-server.json")
     # DATA_PATH = os.path.join(dn, "data-server.json")
     # CERT_PATH = os.path.join(dn, "private_key-server.pem")
@@ -46,10 +45,10 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.INFO)
 
-    if not args.sync and not args.create:
-        if args.server:
-            server_main()
+    if not args.sync and not args.create and not args.server:
         namlat.client_main(args)
+    elif args.server:
+        server_main(args)
     elif args.sync:
         namlat.sync_main(args)
     elif args.create:
