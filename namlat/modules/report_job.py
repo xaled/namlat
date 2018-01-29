@@ -35,6 +35,8 @@ class ReportJob(AbstractNamlatJob):
             self.report("%d handlers executed" % len(executed_handlers), str(executed_handlers))
 
     def process_new_entries(self):
+        if 'reports' not in self.data:
+            self.data['reports'] = {'archive':{} , 'handlers_stack':{}}
         for ad in self.data['new_reports']:
             for nrp in self.data['new_reports'][ad]:
                 # report archive

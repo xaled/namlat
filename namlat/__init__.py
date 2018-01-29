@@ -8,8 +8,9 @@ import logging
 from namlat.context import context
 from namlat.config import SLEEP
 from namlat.utils.edits_dict import EditDict
+# from namlat.updates import Update
 import namlat.utils as nu
-import namlat.updates as nup
+
 import namlat.api.client as client
 import namlat.api.server as server
 
@@ -27,12 +28,15 @@ def client_main(args):
         for job in jobs:
             logger.debug("executing job: %s", job)
             update = execute_job(job)
-            job['last_executed'] = time()
+
             logger.debug("signing update=%s", update)
-            update_signed = nup.sign_update(update, context.rsa_key, context.address)
+            update.sign(context.rsa_key, context.address)
             logger.debug("sending peer update to gw")
-            client.update(update_signed)
+            client.update(update)
             client.pull()
+            update_last_executed(job)
+        if args.cron:
+            break
         logger.info("sleeping for %ds" % SLEEP)
         sleep(SLEEP)
 
@@ -44,13 +48,13 @@ def sync_main(args):
 
 def create_main(args):
     # global logs, data, address, rsa_key, context, secret
-    for f in [args.data_path, args.secret_path, args.logs_path, args.cert_path]:
+    for f in [args.data_path, args.secret_path, args.logs_path, args.cert_path, args.config_path]:
         if os.path.exists(f):
             if args.force_create:
-                logger.warning("file %s already exists. deleting the file!")
+                logger.warning("file %s already exists. deleting the file!", f)
                 os.unlink(f)
             else:
-                print("file %s already exists! try --force-create option.",f)
+                print("file %s already exists! try --force-create option." % f)
                 return
     private_key, public_key = nu.generate_keys()
     with open(args.cert_path,'w') as fou:
@@ -58,17 +62,25 @@ def create_main(args):
     rsa_key = RSA.importKey(open(args.cert_path).read())
     address = nu.public_key_address(rsa_key.publickey())
     logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
-    data = JsonMinConnexion(path=args.data_path, template={'jobs': {}, 'config': {}, 'nodes': {},
+    data = JsonMinConnexion(path=args.data_path, template={'config': {}, 'nodes': {},
                                                            'public_keys': {}, 'new_reports': {}})
     secret = JsonMinConnexion(path=args.secret_path, template={})
-    context.set_context(data, address, secret, logs, rsa_key, args.name)
+    config = JsonMinConnexion(path=args.config_path, template={"jobs": {}})
+    context.set_context(data, address, secret, logs, rsa_key, args.name, config)
     print("What is the gateway for this node?")
     print("(keep it empty if this node does not have a gateway)")
     gw = input(":")
     if gw != '':
         client.create_node(gw, address, public_key, args.name)
+        config['gw'] = gw
+        config.save()
     else:
         server.create_server(address, public_key, args.name)
+
+
+def update_last_executed(job):
+    job['last_executed'] = time()
+    context.config.save()
 
 
 def execute_job(job):
@@ -94,8 +106,8 @@ def execute_job(job):
 
 def get_jobs():
     jobs = list()
-    for job_id in context.data['jobs'][context.address]:
-        job = context.data['jobs'][context.address][job_id]
+    for job_id in context.config['jobs']:
+        job = context.config['jobs'][job_id]
         if time() - job['last_executed'] > job['period']:
             jobs.append(job)
     return jobs
@@ -109,7 +121,8 @@ def load_data(args):
         logs = JsonMinConnexion(path=args.logs_path, create=False)
         data = JsonMinConnexion(path=args.data_path, create=False)
         secret = JsonMinConnexion(path=args.secret_path, create=False)
-        context.set_context(data, address, secret, logs, rsa_key, args.name)
+        config = JsonMinConnexion(path=args.config_path, create=False)
+        context.set_context(data, address, secret, logs, rsa_key, args.name, config)
     except Exception:
         logger.error("Error loading data args=%s", args, exc_info=True)
         print("if fist time run namlat.py --create name")

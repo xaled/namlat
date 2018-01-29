@@ -15,7 +15,8 @@ def pull_request(server, last_commit_id):
 
 def update_request(server, old_commit_id, update):
     try:
-        resp = requests.post(server+'/namlat/update', data={'old_commit_id': old_commit_id, 'update': json.dumps(update)})
+        resp = requests.post(server+'/namlat/update', data={'old_commit_id': old_commit_id,
+                                                            'update': json.dumps(update.get_request_dict())})
         return json.loads(resp.text)['commit_id']
     except Exception as e:
         logger.error("Exception while sending pull request to server:%s", server, exc_info=True)

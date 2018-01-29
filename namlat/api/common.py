@@ -2,8 +2,7 @@ import json
 import logging
 from namlat.context import context
 from namlat.utils import commit_id, path_to_dict
-from namlat.updates import check_signature, Update
-from namlat.utils.edits_dict import EditDict
+from namlat.updates import get_update_from_request_dict, Edit
 
 logger = logging.getLogger(__name__)
 
@@ -22,32 +21,30 @@ def calculate_commit_id(update):
         data_tohash = b''
     else:
         data_tohash = context.logs['commit_ids'][-1].encode()
-    data_tohash += json.dumps(update).encode()
+    data_tohash += json.dumps(update.get_edits_dict()).encode()
     return commit_id(data_tohash)
 
 
 def apply_updates_log(updates_log):  # TODO
     for commit_id in updates_log['commit_ids']:
-        apply_update(updates_log['updates'][commit_id], commit_id)
+        update = get_update_from_request_dict(updates_log['updates'][commit_id])
+        apply_update(update, commit_id) # Todo: check or no check
         
 
 def apply_update(update, commit_id, no_check=False):
     logger.debug("applying update, update=%s, commit_id=%s", update, commit_id)
-    if no_check or check_signature(update, context.data['public_keys']):
-        for edit in update['edits']:
+    if no_check or update.check_signature(context.data['public_keys']):
+        for edit in update.edits:
             apply_edit(edit)
         context.logs['commit_ids'].append(commit_id)
-        context.logs['updates'][commit_id] = update
+        context.logs['updates'][commit_id] = update.get_request_dict()
         context.logs.save()
         context.data.save()
 
 
-
-
-
-
-
 def apply_edit(edit):  # TODO: transaction pattern
+    if isinstance(edit, Edit):
+        edit = edit.get_dict()
     verb, path, value = edit['verb'], edit['path'], edit['value']
     try:
         parent = path_to_dict(context.data, path[:-1], context.address)

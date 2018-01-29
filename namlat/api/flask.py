@@ -1,5 +1,6 @@
 from flask import Flask, Response, json, request
 from threading import Lock, Thread
+from namlat.updates import get_update_from_request_dict
 import namlat.api.server as server
 import logging
 logger = logging.getLogger(__name__)
@@ -56,8 +57,9 @@ def api_update():
         if 'old_commit_id' in request.form and 'update' in request.form:
             old_commit_id = request.form['old_commit_id']
             logger.debug(request.form['update'])
-            update = json.loads(request.form['update'])
-            commit_id = server.update(old_commit_id, update)
+            update_request_dict = json.loads(request.form['update'])
+            update = get_update_from_request_dict(update_request_dict)
+            commit_id = server.updati(old_commit_id, update)
             logger.debug("returning commit_id=%s", commit_id)
             resp_body = json.dumps({"commit_id":commit_id})
             resp = Response(resp_body, status=200, mimetype='application/json')
@@ -95,11 +97,11 @@ def api_create_node():
         data_lock.acquire()
         if 'gw' in request.form and 'public_key' in request.form and 'address' in request.form \
                 and 'node_name' in request.form:
-            gw = request.form['gw']
+            # gw = request.form['gw']
             address = request.form['address']
             public_key = request.form['public_key']
             node_name = request.form['node_name']
-            accepted = server.create_node(gw, address, public_key, node_name)
+            accepted = server.create_node(address, public_key, node_name)
             if accepted:
                 sync_data, sync_logs = server.sync()
             else:
