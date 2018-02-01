@@ -19,8 +19,11 @@ def _convert_to_edit_object(v, parent=None, key=None):
     else:
         raise ValueError("Unsupported value type")
 
+class EditObject(object):
+    pass
 
-class EditDict(object):
+
+class EditDict(EditObject):
     def __init__(self, original_dict, parent=None, key=None):
         self.original_dict = original_dict
         self.current_dict = self._fill_edit_dict(original_dict)
@@ -58,7 +61,7 @@ class EditDict(object):
         return self.current_dict.__len__()
 
     def __repr__(self):
-        self.current_dict.__repr__()
+        return self.current_dict.__repr__()
 
     def __setitem__(self, key, value):
         self.current_dict.__setitem__(key, _convert_to_edit_object(value, self, key))
@@ -88,8 +91,17 @@ class EditDict(object):
     def values(self):
         return self.current_dict.values()
 
+    def deep_copy(self):
+        copy = dict()
+        for k,v in self.current_dict.items():
+            if isinstance(v, EditObject):
+                copy[k] = v.deep_copy()
+            else:
+                copy[k] = v
+        return copy
 
-class EditList(object):
+
+class EditList(EditObject):
     def __init__(self, original_list, parent=None, key=None):
         self.original_list = original_list
         self.current_list = self._fill_edit_list(original_list)
@@ -160,3 +172,12 @@ class EditList(object):
 
     def remove(self, o):
         self.__delitem__(self.index(o))
+
+    def deep_copy(self):
+        copy = list()
+        for v in self.current_list:
+            if isinstance(v, EditObject):
+                copy.append(v.deep_copy())
+            else:
+                copy.append(v)
+        return copy

@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--config-path', action="store", default=None)
     parser.add_argument('--secret-path', action="store", default=None)
     parser.add_argument('--lock-path', action="store", default=None)
-    parser.add_argument('-D', '--data-dir', action="store", default=DATA_DIR)
+    parser.add_argument('-D', '--data-dir', action="store", default=None)
 
     args = parser.parse_args()
 
@@ -33,18 +33,34 @@ if __name__ == "__main__":
     # DATA_PATH = os.path.join(dn, "data-server.json")
     # CERT_PATH = os.path.join(dn, "private_key-server.pem")
     # args = DummyObject()
+    if args.data_dir is None:
+        args.data_dir = os.path.join(DATA_DIR, args.name)
+    if not os.path.exists(args.data_dir):
+        os.makedirs(args.data_dir)
     if args.logs_path is None:
-        args.logs_path = os.path.join(args.data_dir, "logs-%s.json"%args.name)
+        args.logs_path = os.path.join(args.data_dir, "logs.json")
     if args.data_path is None:
-        args.data_path = os.path.join(args.data_dir, "data-%s.json"%args.name)
+        args.data_path = os.path.join(args.data_dir, "data.json")
     if args.cert_path is None:
-        args.cert_path = os.path.join(args.data_dir, "private_key-%s.pem"%args.name)
+        args.cert_path = os.path.join(args.data_dir, "private_key.pem")
     if args.secret_path is None:
-        args.secret_path = os.path.join(args.data_dir, "secret-%s.json"%args.name)
+        args.secret_path = os.path.join(args.data_dir, "secret.json")
     if args.config_path is None:
-        args.config_path = os.path.join(args.data_dir, "config-%s.json"%args.name)
+        args.config_path = os.path.join(args.data_dir, "config.json")
     if args.lock_path is None:
         args.lock_path = os.path.join(args.data_dir, "%s.lock"%args.name)
+    # if args.logs_path is None:
+    #     args.logs_path = os.path.join(args.data_dir, "logs-%s.json"%args.name)
+    # if args.data_path is None:
+    #     args.data_path = os.path.join(args.data_dir, "data-%s.json"%args.name)
+    # if args.cert_path is None:
+    #     args.cert_path = os.path.join(args.data_dir, "private_key-%s.pem"%args.name)
+    # if args.secret_path is None:
+    #     args.secret_path = os.path.join(args.data_dir, "secret-%s.json"%args.name)
+    # if args.config_path is None:
+    #     args.config_path = os.path.join(args.data_dir, "config-%s.json"%args.name)
+    # if args.lock_path is None:
+    #     args.lock_path = os.path.join(args.data_dir, "%s.lock"%args.name)
 
 
 

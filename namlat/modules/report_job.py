@@ -26,6 +26,7 @@ class ReportJob(AbstractNamlatJob):
         for handler in self.get_report_handlers():
             if time.time() > handler.last_execute() + handler.period and handler.has_entries():
                 logger.debug("making and sending report for handler=%s", handler.handler_id)
+                handler.parse_entries()
                 handler.make_report()
                 handler.send()
                 executed_handlers.append(handler.handler_id)
@@ -35,36 +36,48 @@ class ReportJob(AbstractNamlatJob):
             self.report("%d handlers executed" % len(executed_handlers), str(executed_handlers))
 
     def process_new_entries(self):
+        new_reports_count = 0
         if 'reports' not in self.data:
             self.data['reports'] = {'archive':{} , 'handlers_stack':{}}
         for ad in self.data['new_reports']:
             for nrp in self.data['new_reports'][ad]:
-                # report archive
-                report_archive = self.data['reports']['archive']
-                if not ad in report_archive:
-                    report_archive[ad] = dict()
-                if not nrp['report_module'] in report_archive:
-                    report_archive[ad][nrp['report_module']] = dict()
-                if not nrp['report_type'] in report_archive[ad][nrp['report_module']]:
-                    report_archive[ad][nrp['report_module']][nrp['report_type']] = dict()
-                    report_object_pointer = report_archive[ad][nrp['report_module']][nrp['report_type']]
-                    report_object_pointer['title'] = nrp['report_title']
-                    report_object_pointer['subtitle'] = nrp['report_subtitle']
-                    report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['report_module'], nrp['report_type'])
-                    report_object_pointer['entries'] = dict()
-                    report_object_pointer = report_archive[ad][nrp['report_module']][nrp['report_type']]
-                report_object_pointer['entries'][nrp['entry_id']] = nr.make_report_entry(nrp['entry_id'], nrp['title'],
-                                                                                         nrp['message_body'])
+                # report archive TODO: not for now
+                # report_archive = self.data['reports']['archive']
+                # if not ad in report_archive:
+                #     report_archive[ad] = dict()
+                # if not nrp['report_module'] in report_archive:
+                #     report_archive[ad][nrp['report_module']] = dict()
+                # if not nrp['report_type'] in report_archive[ad][nrp['report_module']]:
+                #     report_archive[ad][nrp['report_module']][nrp['report_type']] = dict()
+                #     report_object_pointer = report_archive[ad][nrp['report_module']][nrp['report_type']]
+                #     report_object_pointer['title'] = nrp['report_title']
+                #     report_object_pointer['subtitle'] = nrp['report_subtitle']
+                #     report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['report_module'], nrp['report_type'])
+                #     report_object_pointer['entries'] = dict()
+                #     report_object_pointer = report_archive[ad][nrp['report_module']][nrp['report_type']]
+                # report_object_pointer['entries'][nrp['entry_id']] = nr.make_report_entry(nrp['entry_id'], nrp['title'],
+                #                                                                          nrp['message_body'])
 
                 # handlers stack
                 handlers_stack = self.data['reports']['handlers_stack']
                 for handler in nrp['handlers']:
                     if not handler in handlers_stack:
-                        handlers_stack[handler] = dict()
-                    key = report_object_pointer['uri'] + "#" + nrp['entry_id']
-                    handlers_stack[handler][key] = dict(nrp)
-                    handlers_stack[handler][key]['uri'] = report_object_pointer['uri']
-                    handlers_stack[handler][key]['address'] = ad
+                        handlers_stack[handler] = {'entries': {}, 'last_execute':0.0}
+
+                    #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
+                    uri =  "/reports/%s/%s/%s" % (ad, nrp['report_module'], nrp['report_type'])
+                    key = uri + "#" + nrp['entry_id']
+                    handlers_stack[handler]['entries'][key] = nrp.deep_copy() # dict(nrp)
+                    handlers_stack[handler]['entries'][key]['uri'] = uri
+                    handlers_stack[handler]['entries'][key]['address'] = ad
+
+                # increment new reports count
+                new_reports_count += 1
+
+            # clear new reports
+            self.data['new_reports'][ad].clear()
+
+        logger.debug("processed %d new reports", new_reports_count)
 
     def get_report_handlers(self):
         handlers = list()
@@ -85,6 +98,8 @@ def periodic_handler():
 class Handler:
     def __init__(self, jobargs, datapointer, handler_class, period, period_name):
         self.handler_id = handler_class + "_" + period_name
+        if not self.handler_id in datapointer['reports']['handlers_stack']:
+            datapointer['reports']['handlers_stack'][self.handler_id] = {'entries': {}, 'last_execute':0.0}
         self.pointer = datapointer['reports']['handlers_stack'][self.handler_id]
         self.data = datapointer
         self.period = period
@@ -103,14 +118,14 @@ class Handler:
 
     def handler_executed(self):
         self.pointer['last_execute'] = time.time()
-        for entry in self.pointer['entries'].values():
-            try:
-                report_object_pointer = self.data['reports']['archive'][entry['address']][entry['report_module']][
-                    entry['report_type']]
-                if 'report_id' not in report_object_pointer:
-                    report_object_pointer['report_id'] = entry['report_id']
-            except Exception as e:
-                logger.error("error while updating report_id: " + str(e), exc_info=True)
+        # for entry in self.pointer['entries'].values(): # TODO: not for now, continue archiving (Later)
+        #     try:
+        #         report_object_pointer = self.data['reports']['archive'][entry['address']][entry['report_module']][
+        #             entry['report_type']]
+        #         if 'report_id' not in report_object_pointer:
+        #             report_object_pointer['report_id'] = entry['report_id']
+        #     except Exception as e:
+        #         logger.error("error while updating report_id: " + str(e), exc_info=True)
         self.pointer['entries'].clear()
 
     def parse_entries(self):
@@ -131,13 +146,15 @@ class MailHandler(Handler):
 
     def make_report(self):
         self.subject = self.period_name + " namlat reports " + time.strftime("%d %b %Y", time.gmtime(time.time()))
-        self.mail_body = jinja_env.get_template(MAIL_TEMPLATE).render(reports=self.reports, subject=self.subject,
+        self.mail_body = jinja_env.get_template(MAIL_TEMPLATE).render(reports=self.reports.values(), subject=self.subject,
                                                                       url="http://server/")
+        logger.debug("MailHandler - subject : %s", self.subject)
+        logger.debug("MailHandler - mail_body : %s", self.mail_body)
 
-    def send(self):
+    def send(self): # TODO:
         namlat.utils.mail.send_html(self.subject, self.mail_body, self.jobargs['recipient'],
-                                    self.jobargs['gmail_username'], self.jobargs['gmail_password'])
-
+                                     self.jobargs['gmail_username'], self.jobargs['gmail_password'])
+        #pass
 
 class SmsHandler(Handler):
     def __init__(self, jobargs, datapointer, period, period_name):

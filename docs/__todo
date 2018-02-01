@@ -54,7 +54,7 @@
                 x accept check signature if update contain new signature
                 - enforce permissions:
                     - namla writes only on it address
-                    - job writes only on it database + reports
+                    -
                     - special permissions (reporting, cleaning)
                     - on conflict or permission refused:
                         - log update
