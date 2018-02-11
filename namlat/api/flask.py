@@ -28,6 +28,14 @@ def error_400():
     return resp
 
 
+@app.route('/namlat/ping', methods=['GET'])
+def api_pull():
+    logger.debug("received ping request")
+    resp_body = json.dumps({"ping": True})
+    resp = Response(resp_body, status=200, mimetype='application/json')
+    return resp
+
+
 @app.route('/namlat/pull', methods=['POST'])
 def api_pull():
     logger.debug("received pull request")

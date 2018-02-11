@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # TODO log, info, debug, errors, except exc_info, error_report
 def client_main(args):
     load_data(args)
-    while True:
+    while client.ping():
         client.pull()
         jobs = get_jobs()
         logger.debug("len(jobs)=%d", len(jobs))
@@ -43,11 +43,13 @@ def client_main(args):
 
 def sync_main(args):
     load_data(args)
-    client.sync()
+    if client.ping():
+        client.sync()
 
 
 def create_main(args):
     # global logs, data, address, rsa_key, context, secret
+
     for f in [args.data_path, args.secret_path, args.logs_path, args.cert_path, args.config_path]:
         if os.path.exists(f):
             if args.force_create:
@@ -63,7 +65,10 @@ def create_main(args):
     print("What is the gateway for this node?")
     print("(keep it empty if this node is the master)")
     gw = input(":")
-    is_master = gw == ''
+    is_master = (gw == '')
+    if not client.ping(gw):
+        print("Server unreachable!")
+        return
     # address = nu.public_key_address(rsa_key.publickey())
     # logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
     data = JsonMinConnexion(path=args.data_path, template={'config': {}, 'nodes': {},

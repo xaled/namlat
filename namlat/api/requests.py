@@ -4,6 +4,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def ping_request(server):
+    try:
+        resp = requests.get(server+'/namlat/ping')
+        return json.loads(resp.text)['ping']
+    except:
+        logger.error("Exception while sending ping request to server:%s", server, exc_info=True)
+        return False
+
+
 def pull_request(server, last_commit_id):
     try:
         resp = requests.post(server+'/namlat/pull', data={'last_commit_id': last_commit_id})
