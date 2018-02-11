@@ -71,8 +71,11 @@ class EditDict(EditObject):
         return self.current_dict.__str__()
 
     def clear(self):
-        self.current_dict.clear()
-        self.append_edits(nup.Edit('clear', []))
+        # self.current_dict.clear()
+        # self.append_edits(nup.Edit('clear', []))
+        keys = list(self.current_dict.keys())
+        for  k in keys:
+            self.__delitem__(k)
 
     def get(self, key):
         return self.current_dict.get(key)
@@ -154,8 +157,11 @@ class EditList(EditObject):
         self.append_edits(nup.Edit('append', [], value))
 
     def clear(self):
-        self.current_list.clear()
-        self.append_edits(nup.Edit('clear', []))
+        # self.current_list.clear()
+        # self.append_edits(nup.Edit('clear', []))
+        l = len(self.current_list)
+        for i in range(l):
+            self.__delitem__(i)
 
     def extend(self, other_list):
         for v in other_list:

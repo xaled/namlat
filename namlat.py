@@ -17,11 +17,12 @@ if __name__ == "__main__":
     parser.add_argument('-C', '--cron', action="store_true", default=False)
     parser.add_argument('-d', '--debug', action="store_true", default=False)
     parser.add_argument('-n','--name', action="store", required=True)
-    parser.add_argument('--logs-path', action="store", default=None)
+    # parser.add_argument('--logs-path', action="store", default=None)
     parser.add_argument('--cert-path', action="store", default=None)
     parser.add_argument('--data-path', action="store", default=None)
     parser.add_argument('--config-path', action="store", default=None)
     parser.add_argument('--secret-path', action="store", default=None)
+    parser.add_argument('--localdb-path', action="store", default=None)
     parser.add_argument('--lock-path', action="store", default=None)
     parser.add_argument('-D', '--data-dir', action="store", default=None)
 
@@ -37,8 +38,10 @@ if __name__ == "__main__":
         args.data_dir = os.path.join(DATA_DIR, args.name)
     if not os.path.exists(args.data_dir):
         os.makedirs(args.data_dir)
-    if args.logs_path is None:
-        args.logs_path = os.path.join(args.data_dir, "logs.json")
+    if args.localdb_path is None:
+        args.localdb_path = os.path.join(args.data_dir, "localdb.json")
+    # if args.logs_path is None:
+    #     args.logs_path = os.path.join(args.data_dir, "logs.json")
     if args.data_path is None:
         args.data_path = os.path.join(args.data_dir, "data.json")
     if args.cert_path is None:

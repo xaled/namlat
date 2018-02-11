@@ -64,30 +64,30 @@ def report_conflicts(conflicts):  # TODO: (after report implementation)
     pass
 
 
-def create_node(address, public_key, node_name):
+def create_node(public_key, node_name):
     # TODO works only if there is one server/master that is jobless
-    _create_node(address, public_key, node_name)
+    _create_node(public_key, node_name)
     return True
 
 
-def create_server(address, public_key, node_name):
-    _create_node(address, public_key, node_name)
+def create_server(public_key, node_name):
+    _create_node(public_key, node_name)
 
 
-def _create_node(address, public_key, node_name):
+def _create_node(public_key, node_name):
     edit_data = EditDict(context.data)
-    edit_data['new_reports'][address] = []
+    edit_data['new_reports'][node_name] = []
     try:
-        edit_data['public_keys'][address] = public_key.decode()
+        edit_data['public_keys'][node_name] = public_key.decode()
     except:
-        edit_data['public_keys'][address] = public_key
+        edit_data['public_keys'][node_name] = public_key
     # edit_data['jobs'][address] = {}
     # if gw is None:
     #     edit_data['config'][address] = {}
     # else:
     #     edit_data['config'][address] = {'gw': gw}
-    edit_data['nodes'][address] = {'name': node_name}
+    edit_data['nodes'][node_name] = {'name': node_name}
     update = Update(edit_data.edits)
-    update.sign(context.rsa_key, context.address)
+    update.sign(context.rsa_key, context.node_name)
     commit_id = calculate_commit_id(update)
     apply_update(update, commit_id, no_check=True)

@@ -20,11 +20,18 @@ def commit_id(data):
     return sha256_digest(data)[:32]
 
 
-def path_to_dict(data, path, address):
+# def path_to_dict(data, path, address):
+#     value = data
+#     for key in path:
+#         if key == '{ADDRESS}':
+#             key = address
+#         value = value[key]
+#     return value
+
+
+def path_to_dict(data, path):
     value = data
     for key in path:
-        if key == '{ADDRESS}':
-            key = address
         value = value[key]
     return value
 

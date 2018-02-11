@@ -34,9 +34,9 @@ def sync_request(server):
         return None
 
 
-def create_node_request(server, address, public_key, node_name):
+def create_node_request(server, public_key, node_name):
     try:
-        resp = requests.post(server+'/namlat/createNode', data={'gw':server, 'address':address,
+        resp = requests.post(server+'/namlat/createNode', data={'gw':server, #'address':address,
                                                                 'public_key': public_key, 'node_name': node_name})
         logger.info("received %dB sync data", len(resp.text))
         # logger.info("received data: %s", resp.text)

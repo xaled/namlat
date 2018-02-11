@@ -1,10 +1,12 @@
 import uuid
 import logging as _logging
+from namlat.context import context
+from namlat.updates import Message
 
 logger = _logging.getLogger(__name__)
-context = None
-NEW_REPORT_ENTRY_KEYS = ['entry_id', 'report_type', 'report_title', 'report_module', 'handlers',
-                         'report_subtitle', 'title', 'message_body']
+# context = None
+# NEW_REPORT_ENTRY_KEYS = ['entry_id', 'report_type', 'report_title', 'report_module', 'handlers',
+#                          'report_subtitle', 'title', 'message_body']
 NO_HANDLERS = []
 DEFAULT_HANDLERS = ["mail_daily"]
 DAILY_MAIL_HANDLERS = ["mail_daily"]
@@ -15,84 +17,132 @@ WARNING_HANDLERS = ["telegram_instant", "mail_instant"]
 ALERT_HANDLERS = ["sms_instant", "telegram_instant", "mail_instant"]
 
 
-class Report:
-    """ type_: sms, mail, telegram
-        period:
-        uri:
+# class Report:
+#     """ type_: sms, mail, telegram
+#         period:
+#         uri:
+#
+#     """
+#     def __init__(self, report_title, report_subtitle, report_uri, report_id): # report_id==None for transient reports
+#         # omited params: address, report_module, report_type
+#         # title="{PERIODLY} report of {MODULE}",
+#         self.report_title = report_title
+#         self.report_subtitle = report_subtitle
+#         self.report_uri = report_uri
+#         # self.report_id = uuid.uuid4().hex
+#         self.report_id = report_id
+#         self.entries = list()
+#
+#
+# class ReportEntry:
+#     def __init__(self, title, message_body, entry_id):
+#         self.title = title
+#         self.message_body = message_body
+#         self.entry_id = entry_id
 
-    """
-    def __init__(self, report_title, report_subtitle, report_uri):
-        # omited params: address, report_module, report_type
-        # title="{PERIODLY} report of {MODULE}",
-        self.report_title = report_title
-        self.report_subtitle = report_subtitle
-        self.report_uri = report_uri
-        self.report_id = uuid.uuid4().hex
-        self.entries = list()
 
-
-class ReportEntry:
-    def __init__(self, title, message_body, entry_id):
-        self.title = title
-        self.message_body = message_body
-        self.entry_id = entry_id
-
-
-def make_report_entry(entry_id, title, message_body):
-    report_entry = dict()
-    report_entry['entry_id'] = entry_id
-    report_entry['title'] = title
-    report_entry['message_body'] = message_body
-    return report_entry
+# def make_report_entry(entry_id, title, message_body):
+#     report_entry = dict()
+#     report_entry['entry_id'] = entry_id
+#     report_entry['title'] = title
+#     report_entry['message_body'] = message_body
+#     return report_entry
 
 
 class NewReportEntry:
-    def __init__(self, title, message_body, report_module, report_type, report_title=None,
-                 report_subtitle="", handlers=DEFAULT_HANDLERS, entry_id=None):
+    # def __init__(self, title, message_body, entry_id=None, actions=[]):
+    def __init__(self, node_name, module_, report_type, report_id, report_title, report_subtitle,
+                 handlers, title, message_body, entry_id, actions):
+        # nodes and module
+        self.node_name =node_name
+        # self.reporter_node = reporter_node
+        self.module_ = module_
+
+        # report
+        self.report_type = report_type
+        self.report_id = report_id # report_id = None for transient reports
+        self.report_title = report_title
+        self.report_subtitle = report_subtitle
+        self.handlers = handlers
+
+        # entry
         self.title = title
         self.message_body = message_body
-        self.report_type = report_type
-        #self.report_id = report_id
         if entry_id is None:
             self.entry_id = uuid.uuid4().hex
         else:
             self.entry_id = entry_id
-        self.report_module = report_module
-        self.report_title = report_title
-        self.report_subtitle = report_subtitle
-        self.handlers = handlers
+        self.actions = actions
+
+        # self.title = title
+        # self.message_body = message_body
+        # self.report_type = report_type
+        # #self.report_id = report_id
+        # # if entry_id is None:
+        # #     self.entry_id = uuid.uuid4().hex
+        # # else:
+        # self.entry_id = entry_id
+        # self.report_module = report_module
+        # self.report_title = report_title
+        # self.report_subtitle = report_subtitle
+        # self.handlers = handlers
 
     def get_dict(self):
-        ret = dict()
-        for k in NEW_REPORT_ENTRY_KEYS:
-            ret[k] = self.__dict__[k]
-        return ret
+        return dict(self.__dict__)
+        # ret = dict()
+        # for k in NEW_REPORT_ENTRY_KEYS:
+        #     ret[k] = self.__dict__[k]
+        # return ret
 
 
 class NewReportMaker:
-    def __init__(self, module_, report_type, report_title=None, report_subtitle="", handlers=[]):
-        self.report_type = report_type
+    def __init__(self, inboxpointer, module_, report_type, handlers, report_id=None, node_name=context.node_name,
+                 reporter_node='reporter', report_title=None, report_subtitle="" ):
+        # nodes and module
+        self.inboxpointer = inboxpointer
+        self.node_name =node_name
+        self.reporter_node = reporter_node
         self.module_ = module_
-        self.report_title = report_title
+
+        # report
+        self.report_type = report_type
+        self.report_id = report_id # report_id = None for transient reports
+        if report_title is None:
+            self.report_title = "%s.%s report for namla %s" % (self.module_, self.report_type, self.node_name)
+        else:
+            self.report_title = report_title
         self.report_subtitle = report_subtitle
         self.handlers = handlers
 
-    def make_new_report_entry(self, title, message_body, entry_id=None):
-        return NewReportEntry(title, message_body, self.module_, self.report_type, self.report_title,
-                              self.report_subtitle, self.handlers, entry_id)
+    # def make_new_report_entry(self, title, message_body, entry_id=None, actions=[]):
+    #     return NewReportEntry(self.node_name, self.reporter_node, self.module_, self.report_type,
+    #                           self.report_id, self.report_title, self.report_subtitle, self.handlers,
+    #                           title, message_body, entry_id, actions)
+    #
+    def append_new_report_entry(self, title, message_body, entry_id=None, actions=[]):
+        new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type,
+                                        self.report_id, self.report_title, self.report_subtitle, self.handlers,
+                                        title, message_body, entry_id, actions).get_dict()
+
+        message  = Message(self.node_name, self.module_, self.reporter_node, 'namlat.modules.report_job','report',
+                           new_entry_dict )
+        message.send()
 
 
 
 
-class LogEntry:
-    def __init__(self, level, message, time_, module_):
-        self.level = level
-        self.message = message
-        self.time_ = time_
-        self.module_ = module_
 
 
-def append_new_report_entry(data_pointer, address, new_report_entry):
-    data_pointer['new_reports'][address].append(new_report_entry.get_dict())
+# class LogEntry:
+#     def __init__(self, level, message, time_, module_):
+#         self.level = level
+#         self.message = message
+#         self.time_ = time_
+#         self.module_ = module_
+
+
+# def append_new_report_entry(data_pointer, node_name, new_report_entry, reporter_node='reporter'):
+#     # data_pointer['new_reports'][node_name].append(new_report_entry.get_dict())
+#     data_pointer['inbox'][reporter_node].append(new_report_entry.get_dict())
 
 

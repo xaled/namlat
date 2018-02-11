@@ -11,7 +11,7 @@ def get_update_from_request_dict(request_dict):
     update = Update(edits)
     update.edits_json = request_dict['edits_json']
     update.signature = request_dict['signature']
-    update.address = request_dict['address']
+    update.node_name = request_dict['node_name']
     update.signed = True
     update.checked = False
     update.check = False
@@ -23,30 +23,32 @@ class Update:
         self.edits = edits
         self.edits_json = None
         self.signature = None
-        self.address = None
+        # self.address = None
+        self.node_name = None
         self.signed = False
         self.checked = True
         self.check = True
         self.edit_class = True
 
-    def sign(self, rsa_key, address):
+    def sign(self, rsa_key, node_name):
         if not self.signed:
             self.edits_json = json.dumps(self.get_edits_dict())
             data_tosign = self.edits_json.encode()
             self.signature = nu.sign_data(rsa_key, data_tosign)
-            self.address = address
+            # self.address = address
+            self.node_name = node_name
             self.signed = True
 
     def check_signature(self, public_keys):
         if not self.checked:
-            rsapubkey = RSA.importKey(public_keys[self.address].encode())
+            rsapubkey = RSA.importKey(public_keys[self.node_name].encode())
             data_toverify = self.edits_json.encode()
             self.check = nu.verify_sign(rsapubkey, self.signature, data_toverify)
             self.checked = True
         return self.check
 
     def get_request_dict(self):
-        return {'address': self.address, 'signature': self.signature, 'edits_json': self.edits_json}
+        return {'node_name': self.node_name, 'signature': self.signature, 'edits_json': self.edits_json}
 
     def get_edits_dict(self):
         if self.edit_class:
@@ -69,6 +71,24 @@ class Edit:
 
     def get_dict(self):
         return {'verb': self.verb, 'path': self.path, 'value': self.value}
+
+
+class Message:
+    def __init__(self, from_node, from_module, to_node, to_module, type, content):
+        self.from_node = from_node
+        self.from_module = from_module
+        self.to_node = to_node
+        self.to_module = to_module
+        self.type = type
+        self.content = content
+
+    def get_dict(self):
+        return dict(self.__dict__)
+
+    def send(self, inboxpointer):
+        if self.to_node in inboxpointer:
+            inboxpointer[self.reporter_node] = list()
+        inboxpointer[self.reporter_node].append(self.get_dict())
 
 
 # def sign_update(update, rsa_key, address):

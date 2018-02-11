@@ -95,13 +95,12 @@ def api_create_node():
     logger.debug("received client sync")
     try:
         data_lock.acquire()
-        if 'gw' in request.form and 'public_key' in request.form and 'address' in request.form \
-                and 'node_name' in request.form:
+        if 'gw' in request.form and 'public_key' in request.form and 'node_name' in request.form: # and 'address' in request.form \
             # gw = request.form['gw']
-            address = request.form['address']
+            # address = request.form['address']
             public_key = request.form['public_key']
             node_name = request.form['node_name']
-            accepted = server.create_node(address, public_key, node_name)
+            accepted = server.create_node(public_key, node_name)
             if accepted:
                 sync_data, sync_logs = server.sync()
             else:

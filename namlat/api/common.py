@@ -47,7 +47,7 @@ def apply_edit(edit):  # TODO: transaction pattern
         edit = edit.get_dict()
     verb, path, value = edit['verb'], edit['path'], edit['value']
     try:
-        parent = path_to_dict(context.data, path[:-1], context.address)
+        parent = path_to_dict(context.data, path[:-1])
         key = path[-1]
         try: old_value = parent[key]
         except: old_value = None
@@ -93,7 +93,7 @@ def apply_edit(edit):  # TODO: transaction pattern
                 parent[key] = list()
             else:
                 raise ValueError("Object to remove from is not a list")
-        elif verb == 'remove-items':
+        elif verb == 'remove-items': # too much data sent
             if isinstance(old_value, list):
                 for item in value:
                     if item in old_value:
@@ -111,9 +111,9 @@ def apply_edit(edit):  # TODO: transaction pattern
                 parent[key] = dict()
             else:
                 raise ValueError("Object to remove from is not a dict")
-        elif verb == 'clear':
-            if key in parent:
-                parent[key].clear()
+        # elif verb == 'clear': # too broad
+        #     if key in parent:
+        #         parent[key].clear()
         else:
             pass  # TODO: log
     except:

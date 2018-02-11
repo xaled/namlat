@@ -16,8 +16,12 @@ class GitJob(AbstractNamlatJob):
 
     def execute(self):
         logger.info("executing GitJob")
-        report_maker = nr.NewReportMaker(self.module_, "gitstatus", "Git cron report for host " + self.context.address,
-                                         handlers=nr.DAILY_MAIL_HANDLERS)
+        # report_maker = nr.NewReportMaker(self.module_, "gitstatus", "Git cron report for host " + self.context.node_name,
+        #                                  handlers=nr.DAILY_MAIL_HANDLERS)
+        # report_maker = nr.NewReportMaker(self.data, self.module_, "gitstatus", "Git cron report for host " + self.context.node_name,
+        #                                  handlers=nr.DAILY_MAIL_HANDLERS)
+        report_maker = self.get_report_maker("gitstatus", nr.DAILY_MAIL_HANDLERS,
+                                             report_title="Git cron report for host " + self.context.node_name, )
         for root_dir in self.kwargs['root-dirs']:
             logger.debug("processing root-dir:%s", root_dir)
             sub_dirs = [os.path.join(root_dir, child) for child in os.listdir(root_dir) if

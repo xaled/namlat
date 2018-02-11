@@ -30,7 +30,7 @@ def client_main(args):
             update = execute_job(job)
 
             logger.debug("signing update=%s", update)
-            update.sign(context.rsa_key, context.address)
+            update.sign(context.rsa_key, context.node_name)
             logger.debug("sending peer update to gw")
             client.update(update)
             client.pull()
@@ -60,22 +60,26 @@ def create_main(args):
     with open(args.cert_path,'w') as fou:
         fou.write(private_key.decode())
     rsa_key = RSA.importKey(open(args.cert_path).read())
-    address = nu.public_key_address(rsa_key.publickey())
-    logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
+    print("What is the gateway for this node?")
+    print("(keep it empty if this node is the master)")
+    gw = input(":")
+    is_master = gw == ''
+    # address = nu.public_key_address(rsa_key.publickey())
+    # logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
     data = JsonMinConnexion(path=args.data_path, template={'config': {}, 'nodes': {},
-                                                           'public_keys': {}, 'new_reports': {}})
+                                                           'public_keys': {}, 'inbox':{}})
     secret = JsonMinConnexion(path=args.secret_path, template={})
     config = JsonMinConnexion(path=args.config_path, template={"jobs": {}})
-    context.set_context(data, address, secret, logs, rsa_key, args.name, config)
-    print("What is the gateway for this node?")
-    print("(keep it empty if this node does not have a gateway)")
-    gw = input(":")
-    if gw != '':
-        client.create_node(gw, address, public_key, args.name)
+    localdb = JsonMinConnexion(path=args.config_path, template={"jobs": {}, "is_master": is_master})
+    # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
+    context.set_context(data, secret, rsa_key, args.name, config, localdb)
+
+    if not is_master:
+        client.create_node(gw, public_key, args.name)
         config['gw'] = gw
         config.save()
     else:
-        server.create_server(address, public_key, args.name)
+        server.create_server(public_key, args.name)
 
 
 def update_last_executed(job):
@@ -117,12 +121,14 @@ def load_data(args):
     try:
         # global logs, data, address, rsa_key, context, secret
         rsa_key = RSA.importKey(open(args.cert_path).read())
-        address = nu.public_key_address(rsa_key.publickey())
-        logs = JsonMinConnexion(path=args.logs_path, create=False)
+        # address = nu.public_key_address(rsa_key.publickey())
+        # logs = JsonMinConnexion(path=args.logs_path, create=False)
         data = JsonMinConnexion(path=args.data_path, create=False)
         secret = JsonMinConnexion(path=args.secret_path, create=False)
         config = JsonMinConnexion(path=args.config_path, create=False)
-        context.set_context(data, address, secret, logs, rsa_key, args.name, config)
+        localdb = JsonMinConnexion(path=args.localdb_path, create=False)
+        # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
+        context.set_context(data, secret, rsa_key, args.name, config, localdb)
     except Exception:
         logger.error("Error loading data args=%s", args, exc_info=True)
         print("if fist time run namlat.py --create name")

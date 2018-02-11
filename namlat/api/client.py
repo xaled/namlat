@@ -32,6 +32,6 @@ def sync():
         logger.warning("Client does not have a gateway to sync from.")
 
 
-def create_node(gw, address, public_key, node_name):
-    created, sync_data, sync_logs = create_node_request(gw, address, public_key, node_name)
+def create_node(gw, public_key, node_name):
+    created, sync_data, sync_logs = create_node_request(gw, public_key, node_name)
     apply_sync_data(sync_data, sync_logs)
