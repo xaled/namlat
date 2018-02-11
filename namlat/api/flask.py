@@ -28,16 +28,21 @@ def error_400():
     return resp
 
 
-@app.route('/namlat/ping', methods=['GET'])
-def api_pull():
-    logger.debug("received ping request")
-    resp_body = json.dumps({"ping": True})
-    resp = Response(resp_body, status=200, mimetype='application/json')
-    return resp
+@app.route('/namlat/ping', methods=['POST'])
+def ping():
+    with data_lock:
+        logger.debug("received ping request")
+        if 'node_name' in request.form:
+            resp_body = json.dumps({"ping": server.ping(request.form['node_name'])})
+            resp = Response(resp_body, status=200, mimetype='application/json')
+            return resp
+        else:
+            logger.warning("'node_name' param is not in the request data")
+            return error_400()
 
 
 @app.route('/namlat/pull', methods=['POST'])
-def api_pull():
+def pull():
     logger.debug("received pull request")
     try:
         data_lock.acquire()
@@ -58,7 +63,7 @@ def api_pull():
 
 
 @app.route('/namlat/update', methods=['POST'])
-def api_update():
+def update():
     logger.debug("received client update")
     try:
         data_lock.acquire()
@@ -83,7 +88,7 @@ def api_update():
 
 
 @app.route('/namlat/sync', methods=['GET'])
-def api_sync():
+def sync():
     logger.debug("received client sync")
     try:
         data_lock.acquire()
@@ -99,7 +104,7 @@ def api_sync():
 
 
 @app.route('/namlat/createNode', methods=['POST'])
-def api_create_node():
+def create_node():
     logger.debug("received client sync")
     try:
         data_lock.acquire()

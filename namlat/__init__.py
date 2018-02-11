@@ -32,7 +32,7 @@ def client_main(args):
             logger.debug("signing update=%s", update)
             update.sign(context.rsa_key, context.node_name)
             logger.debug("sending peer update to gw")
-            client.update(update)
+            client.updati(update)
             client.pull()
             update_last_executed(job)
         if args.cron:
@@ -75,7 +75,8 @@ def create_main(args):
                                                            'public_keys': {}, 'inbox':{}})
     secret = JsonMinConnexion(path=args.secret_path, template={})
     config = JsonMinConnexion(path=args.config_path, template={"jobs": {}})
-    localdb = JsonMinConnexion(path=args.config_path, template={"jobs": {}, "is_master": is_master})
+    localdb = JsonMinConnexion(path=args.config_path, template={"jobs": {}, "is_master": is_master,
+                                                                "last_commit_id":""})
     # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
     context.set_context(data, secret, rsa_key, args.name, config, localdb)
 

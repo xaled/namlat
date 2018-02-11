@@ -4,9 +4,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def ping_request(server):
+def ping_request(server, node_name):
     try:
-        resp = requests.get(server+'/namlat/ping')
+        resp = requests.post(server+'/namlat/ping', data={'node_name': node_name})
         return json.loads(resp.text)['ping']
     except:
         logger.error("Exception while sending ping request to server:%s", server, exc_info=True)

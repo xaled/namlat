@@ -1,26 +1,27 @@
 import json
 import logging
+import time
 from namlat.context import context
 from namlat.utils import commit_id, path_to_dict
 from namlat.updates import get_update_from_request_dict, Edit
 
 logger = logging.getLogger(__name__)
 
-def apply_sync_data(sync_data, sync_logs):
+def apply_sync_data(sync_data, sync_logs, isserver=False):
     # global data, logs
     context.data.db.clear()
     context.data.db.update(sync_data)
     context.data.save()
-    context.logs.db.clear()
-    context.logs.db.update(sync_logs)
-    context.logs.save()
+    if isserver:
+        context.localdb['logs'].clear()
+        context.localdb['logs'].update(sync_logs)
+    context.localdb['last_commit_id'] = sync_logs['commit_ids'][-1]
+    context.localdb.save()
 
 
 def calculate_commit_id(update):
-    if len(context.logs['commit_ids']) == 0:
-        data_tohash = b''
-    else:
-        data_tohash = context.logs['commit_ids'][-1].encode()
+    # if len(context.logs['commit_ids']) == 0:
+    data_tohash = context.localdb['last_commit_id'].encode()
     data_tohash += json.dumps(update.get_edits_dict()).encode()
     return commit_id(data_tohash)
 
@@ -31,14 +32,17 @@ def apply_updates_log(updates_log):  # TODO
         apply_update(update, commit_id) # Todo: check or no check
         
 
-def apply_update(update, commit_id, no_check=False):
+def apply_update(update, commit_id, no_check=False, server=False):
     logger.debug("applying update, update=%s, commit_id=%s", update, commit_id)
     if no_check or update.check_signature(context.data['public_keys']):
         for edit in update.edits:
             apply_edit(edit)
-        context.logs['commit_ids'].append(commit_id)
-        context.logs['updates'][commit_id] = update.get_request_dict()
-        context.logs.save()
+        context.localdb['last_commit_id'] = commit_id
+        if server:
+            context.localdb['logs']['commit_ids'].append(commit_id)
+            context.localdb['logs']['updates'][commit_id] = update.get_request_dict()
+            context.localdb['logs']['updates'][commit_id]['timestamp'] = time.time()
+        context.localdb.save()
         context.data.save()
 
 
