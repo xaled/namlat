@@ -131,7 +131,7 @@ class EditList(EditObject):
 
     def __delitem__(self, o):
         self.current_list.__delitem__(o)
-        self.append_edits(nup.Edit('remove', [], o))
+        self.append_edits(nup.Edit('del', [], o))
 
     def __getitem__(self, o):
         return self.current_list.__getitem__(o)
@@ -169,7 +169,7 @@ class EditList(EditObject):
         self.append_edits(nup.Edit('extend', [], other_list))
 
     def index(self, o):
-        return self.index(o)
+        return self.current_list.index(o)
 
     def insert(self, i, v):
         vc = _convert_to_edit_object(v, self, i)

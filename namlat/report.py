@@ -126,7 +126,7 @@ class NewReportMaker:
 
         message  = Message(self.node_name, self.module_, self.reporter_node, 'namlat.modules.report_job','report',
                            new_entry_dict )
-        message.send()
+        message.send(self.inboxpointer)
 
 
 

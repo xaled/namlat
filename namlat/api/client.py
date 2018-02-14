@@ -4,12 +4,14 @@ from namlat.api.common import apply_update, apply_updates_log, calculate_commit_
 from namlat.api.requests import pull_request, update_request, sync_request, create_node_request, ping_request
 logger = logging.getLogger(__name__)
 
-def ping(server=None):
+def ping(server=None, node_name=None):
+    if node_name is None:
+        node_name = context.node_name
     if server is None:
         if 'gw' in context.config:
-            return ping_request(context.confg['gw'], context.node_name)
+            return ping_request(context.config['gw'], node_name)
         return True
-    return ping_request(server)
+    return ping_request(server, node_name)
 
 
 def pull():

@@ -1,6 +1,7 @@
 from Crypto.PublicKey import RSA
 import logging as _logging
 import json
+import time
 import namlat.utils as nu
 
 logger = _logging.getLogger(__name__)
@@ -81,14 +82,15 @@ class Message:
         self.to_module = to_module
         self.type = type
         self.content = content
+        self.timestamp = time.time()
 
     def get_dict(self):
         return dict(self.__dict__)
 
     def send(self, inboxpointer):
-        if self.to_node in inboxpointer:
-            inboxpointer[self.reporter_node] = list()
-        inboxpointer[self.reporter_node].append(self.get_dict())
+        # if self.to_node not in inboxpointer:
+        #     inboxpointer[self.to_node] = list()
+        inboxpointer[self.to_node].append(self.get_dict())
 
 
 # def sign_update(update, rsa_key, address):

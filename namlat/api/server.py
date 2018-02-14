@@ -47,7 +47,7 @@ def updati(old_commit_id, update):
 
 
 def sync():
-    return context.data.db, context.localdb['logs'].db
+    return context.data.db, context.localdb['logs']
 
 
 # def check_conflicts(old_commit_id, update):
@@ -86,7 +86,7 @@ def create_server(public_key, node_name):
 
 def _create_node(public_key, node_name):
     edit_data = EditDict(context.data)
-    edit_data['new_reports'][node_name] = []
+    edit_data['inbox'][node_name] = []
     try:
         edit_data['public_keys'][node_name] = public_key.decode()
     except:

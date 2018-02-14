@@ -39,6 +39,8 @@ def apply_update(update, commit_id, no_check=False, server=False):
             apply_edit(edit)
         context.localdb['last_commit_id'] = commit_id
         if server:
+            if 'logs' not in context.localdb:
+                context.localdb['logs'] = {'commit_ids':list(), 'updates':dict()}
             context.localdb['logs']['commit_ids'].append(commit_id)
             context.localdb['logs']['updates'][commit_id] = update.get_request_dict()
             context.localdb['logs']['updates'][commit_id]['timestamp'] = time.time()

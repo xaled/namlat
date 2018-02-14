@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument('-C', '--cron', action="store_true", default=False)
     parser.add_argument('-d', '--debug', action="store_true", default=False)
     parser.add_argument('-n','--name', action="store", required=True)
+    parser.add_argument('--gw', action="store", default=None)
     # parser.add_argument('--logs-path', action="store", default=None)
     parser.add_argument('--cert-path', action="store", default=None)
     parser.add_argument('--data-path', action="store", default=None)

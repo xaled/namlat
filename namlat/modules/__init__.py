@@ -25,7 +25,7 @@ class AbstractNamlatJob:
         # self.default_report_maker = nr.NewReportMaker(module_, "_")
         self.default_report_maker = nr.NewReportMaker(self.data['inbox'], self.module_, '_', nr.NOTIFICATION_HANDLERS,
                                                       report_title="Default Report for module %s, namla: %s" %
-                                                                   (self.module_, self.report_type, self.node_name))
+                                                                   (self.module_, self.context.node_name))
 
     def get_update(self):
         return nu.Update(self.data.edits)

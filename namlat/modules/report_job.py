@@ -53,16 +53,16 @@ class ReportJob(AbstractNamlatJob):
                 # report_archive = self.data['reports']['archive']
                 # if not ad in report_archive:
                 #     report_archive[ad] = dict()
-                # if not nrp['report_module'] in report_archive:
-                #     report_archive[ad][nrp['report_module']] = dict()
-                # if not nrp['report_type'] in report_archive[ad][nrp['report_module']]:
-                #     report_archive[ad][nrp['report_module']][nrp['report_type']] = dict()
-                #     report_object_pointer = report_archive[ad][nrp['report_module']][nrp['report_type']]
+                # if not nrp['module_'] in report_archive:
+                #     report_archive[ad][nrp['module_']] = dict()
+                # if not nrp['report_type'] in report_archive[ad][nrp['module_']]:
+                #     report_archive[ad][nrp['module_']][nrp['report_type']] = dict()
+                #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
                 #     report_object_pointer['title'] = nrp['report_title']
                 #     report_object_pointer['subtitle'] = nrp['report_subtitle']
-                #     report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['report_module'], nrp['report_type'])
+                #     report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['module_'], nrp['report_type'])
                 #     report_object_pointer['entries'] = dict()
-                #     report_object_pointer = report_archive[ad][nrp['report_module']][nrp['report_type']]
+                #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
                 # report_object_pointer['entries'][nrp['entry_id']] = nr.make_report_entry(nrp['entry_id'], nrp['title'],
                 #                                                                          nrp['message_body'])
 
@@ -78,13 +78,13 @@ class ReportJob(AbstractNamlatJob):
                     #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
                     # if nrp['report_id'] is None: # transient report:
                     #     # uri = ""
-                    #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['report_module'], nrp['report_type'],
+                    #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
                     #                               nrp['report_id'], nrp['entry_id'])
                     # else:
-                    #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['report_module'], nrp['report_type'],
+                    #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
                     #     #                                  nrp['report_id'])
                     #     # uri = "/reports/%s" % nrp['report_id']
-                    key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['report_module'], nrp['report_type'],
+                    key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
                                                   'None', nrp['entry_id'])
                     handlers_stack[handler]['entries'][key] = nrp.deep_copy() # dict(nrp)
                     # handlers_stack[handler]['entries'][key]['uri'] = uri
@@ -146,7 +146,7 @@ class Handler:
         self.pointer['last_execute'] = time.time()
         # for entry in self.pointer['entries'].values(): # TODO: not for now, continue archiving (Later)
         #     try:
-        #         report_object_pointer = self.data['reports']['archive'][entry['node_name']][entry['report_module']][
+        #         report_object_pointer = self.data['reports']['archive'][entry['node_name']][entry['module_']][
         #             entry['report_type']]
         #         if 'report_id' not in report_object_pointer:
         #             report_object_pointer['report_id'] = entry['report_id']
@@ -157,20 +157,20 @@ class Handler:
     def parse_entries(self):
         self.reports = dict()
         for entry in self.get_entries():
-            # entry keys: ['node_name', 'uri', 'entry_id', 'report_type', 'report_title', 'report_module',
+            # entry keys: ['node_name', 'uri', 'entry_id', 'report_type', 'report_title', 'module_',
             # 'handlers', 'report_subtitle', 'title', 'message_body']
             # if entry['uri'] not in self.reports:
-            report_key = "/%s/%s/%s/%s" % (entry['node_name'], entry['report_module'], entry['report_type'],
+            report_key = "/%s/%s/%s/%s" % (entry['node_name'], entry['module_'], entry['report_type'],
                                               entry['report_id'])
             if report_key not in self.reports:
                 if entry['report_id'] is None:
                     report_uri = ""
                 else:
-                    report_uri = "/reports/%s/%s/%s/%s" % (entry['node_name'], entry['report_module'],
+                    report_uri = "/reports/%s/%s/%s/%s" % (entry['node_name'], entry['module_'],
                                                            entry['report_type'], entry['report_id'])
                 self.reports[report_key] = Report(entry['report_title'], entry['report_subtitle'], report_uri) #nr.Report(entry['report_title'], entry['report_subtitle'], entry['uri'])
 
-            self.reports[entry['uri']].entries.append(ReportEntry(entry['title'], entry['message_body'],
+            self.reports[report_key].entries.append(ReportEntry(entry['title'], entry['message_body'],
                                                                   entry['entry_id'], entry['actions']))
 
 
@@ -181,7 +181,7 @@ class MailHandler(Handler):
     def make_report(self):
         self.subject = self.period_name + " namlat reports " + time.strftime("%d %b %Y", time.gmtime(time.time()))
         self.mail_body = jinja_env.get_template(MAIL_TEMPLATE).render(reports=self.reports.values(), subject=self.subject,
-                                                                      url=context.config['server'])
+                                                                      url=self.jobargs['server'])
         logger.debug("MailHandler - subject : %s", self.subject)
         logger.debug("MailHandler - mail_body : %s", self.mail_body)
 
