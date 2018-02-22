@@ -1,6 +1,5 @@
 from namlat.context import context
-import namlat.report as nr
-import namlat.updates as nu
+from namlat.updates import Message
 from namlat.modules import AbstractNamlatJob
 import namlat.utils.mail
 import time
@@ -89,6 +88,12 @@ class ReportJob(AbstractNamlatJob):
                     handlers_stack[handler]['entries'][key] = nrp.deep_copy() # dict(nrp)
                     # handlers_stack[handler]['entries'][key]['uri'] = uri
                     # handlers_stack[handler]['entries'][key]['node_name'] = ad
+
+                # Archive report for web app
+                if nrp['report_archived'] and nrp['report_id'] is not None:
+                    message = Message(self.context.node_name, self.module_, "master", "namlat.modules.report_web",
+                                      "report", nrp)
+                    message.send(self.data['inbox'])
 
                 # increment new reports count
                 new_reports_entries_count += 1

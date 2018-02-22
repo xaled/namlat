@@ -51,7 +51,7 @@ ALERT_HANDLERS = ["sms_instant", "telegram_instant", "mail_instant"]
 
 class NewReportEntry:
     # def __init__(self, title, message_body, entry_id=None, actions=[]):
-    def __init__(self, node_name, module_, report_type, report_id, report_title, report_subtitle,
+    def __init__(self, node_name, module_, report_type, report_id, report_title, report_subtitle, report_archived,
                  handlers, title, message_body, entry_id, actions):
         # nodes and module
         self.node_name =node_name
@@ -63,6 +63,7 @@ class NewReportEntry:
         self.report_id = report_id # report_id = None for transient reports
         self.report_title = report_title
         self.report_subtitle = report_subtitle
+        self.report_archived = report_archived
         self.handlers = handlers
 
         # entry
@@ -96,8 +97,8 @@ class NewReportEntry:
 
 
 class NewReportMaker:
-    def __init__(self, inboxpointer, module_, report_type, handlers, report_id=None, node_name=context.node_name,
-                 reporter_node='reporter', report_title=None, report_subtitle="" ):
+    def __init__(self, inboxpointer, module_, report_id, report_type, handlers, node_name=context.node_name,
+                 reporter_node='reporter', report_title=None, report_subtitle="", report_archived=True):
         # nodes and module
         self.inboxpointer = inboxpointer
         self.node_name =node_name
@@ -112,6 +113,7 @@ class NewReportMaker:
         else:
             self.report_title = report_title
         self.report_subtitle = report_subtitle
+        self.report_archived = report_archived
         self.handlers = handlers
 
     # def make_new_report_entry(self, title, message_body, entry_id=None, actions=[]):
@@ -120,11 +122,11 @@ class NewReportMaker:
     #                           title, message_body, entry_id, actions)
     #
     def append_new_report_entry(self, title, message_body, entry_id=None, actions=[]):
-        new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type,
-                                        self.report_id, self.report_title, self.report_subtitle, self.handlers,
+        new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type, self.report_id,
+                                        self.report_title, self.report_subtitle, self.report_archived, self.handlers,
                                         title, message_body, entry_id, actions).get_dict()
 
-        message  = Message(self.node_name, self.module_, self.reporter_node, 'namlat.modules.report_job','report',
+        message = Message(self.node_name, self.module_, self.reporter_node, 'namlat.modules.report_job','report',
                            new_entry_dict )
         message.send(self.inboxpointer)
 

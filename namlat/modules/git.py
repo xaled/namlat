@@ -20,7 +20,7 @@ class GitJob(AbstractNamlatJob):
         #                                  handlers=nr.DAILY_MAIL_HANDLERS)
         # report_maker = nr.NewReportMaker(self.data, self.module_, "gitstatus", "Git cron report for host " + self.context.node_name,
         #                                  handlers=nr.DAILY_MAIL_HANDLERS)
-        report_maker = self.get_report_maker("gitstatus", nr.DAILY_MAIL_HANDLERS,
+        report_maker = self.get_report_maker(None, "gitstatus", nr.DAILY_MAIL_HANDLERS, report_archived=False,
                                              report_title="Git cron report for host " + self.context.node_name, )
         for root_dir in self.kwargs['root-dirs']:
             logger.debug("processing root-dir:%s", root_dir)

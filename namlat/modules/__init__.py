@@ -23,7 +23,7 @@ class AbstractNamlatJob:
         self.module_ = module_
         self.class_ = class_
         # self.default_report_maker = nr.NewReportMaker(module_, "_")
-        self.default_report_maker = nr.NewReportMaker(self.data['inbox'], self.module_, '_', nr.NOTIFICATION_HANDLERS,
+        self.default_report_maker = nr.NewReportMaker(self.data['inbox'], self.module_,'_', '_', nr.NOTIFICATION_HANDLERS,
                                                       report_title="Default Report for module %s, namla: %s" %
                                                                    (self.module_, self.context.node_name))
 
@@ -43,11 +43,12 @@ class AbstractNamlatJob:
         # nr.append_new_report_entry(self.data, self.context.node_name, new_report_entry)
         report_maker.append_new_report_entry(title, message_body, entry_id, actions)
 
-    def get_report_maker(self, report_type, handlers, report_id=None,
-                 reporter_node='reporter', report_title=None, report_subtitle=""):
-        return nr.NewReportMaker(self.data['inbox'], self.module_, report_type, handlers, report_id=report_id,
+    def get_report_maker(self, report_id, report_type, handlers,
+                 reporter_node='reporter', report_title=None, report_subtitle="", report_archive=True):
+        return nr.NewReportMaker(self.data['inbox'], self.module_, report_id, report_type, handlers,
                                  node_name=context.node_name, reporter_node=reporter_node, report_title=report_title,
-                                 report_subtitle=report_subtitle)
+                                 report_subtitle=report_subtitle, report_archived=report_archive)
+
 
     def finished(self):
         pass
