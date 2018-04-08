@@ -3,6 +3,7 @@ import argparse
 import logging
 import os
 from kutils.lockfile import pidlock, release_lock, LockHeld
+from kutils.logs import configure_logging
 import namlat
 from namlat.api.flask import server_main
 from namlat.config import DATA_DIR
@@ -70,9 +71,11 @@ if __name__ == "__main__":
 
 
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        configure_logging(level="DEBUG", modules=["kutils", "namlat"])
+        # logging.basicConfig(level=logging.DEBUG)
     else:
-        logging.basicConfig(level=logging.INFO)
+        configure_logging(level="INFO", modules=["kutils", "namlat"])
+        # logging.basicConfig(level=logging.INFO)
 
     try:
         pidlock(args.lock_path)

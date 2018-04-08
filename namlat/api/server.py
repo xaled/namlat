@@ -5,6 +5,7 @@ from namlat.context import context
 from namlat.api.common import apply_update, calculate_commit_id
 from namlat.utils.edits_dict import EditDict
 from namlat.updates import Update
+from namlat.updates.message_server import message_server
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def ping(node_name):
     return True
 
 
-def pull(last_commit_id):
+def pull(last_commit_id, node_name):
     updates_log = dict()
     if last_commit_id in context.localdb['logs']['commit_ids']:
         _index = context.localdb['logs']['commit_ids'].index(last_commit_id)
@@ -25,12 +26,17 @@ def pull(last_commit_id):
         updates_log['updates'] = dict()
         for commit_id in updates_log['commit_ids']:
             updates_log['updates'][commit_id] = context.localdb['logs']['updates'][commit_id]
-        return updates_log
+        return updates_log, message_server.get_mail_bag(node_name)
     else:
-        return None
+        return None, []
 
 
-def updati(old_commit_id, update):
+def updati(old_commit_id, update, outgoing_mail):
+    # logger.debug("received update outgoing_mail: %s", outgoing_mail)
+    for recipient in outgoing_mail:
+        for message in outgoing_mail[recipient]:
+            message_server.receive(message, forward=True)
+
     if not update.check_signature(context.data['public_keys']):
         logger.warning("Bad signature")
         return

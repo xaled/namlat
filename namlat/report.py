@@ -1,7 +1,7 @@
 import uuid
 import logging as _logging
 from namlat.context import context
-from namlat.updates import Message
+from namlat.updates.messages import Message
 
 logger = _logging.getLogger(__name__)
 # context = None
@@ -97,10 +97,10 @@ class NewReportEntry:
 
 
 class NewReportMaker:
-    def __init__(self, inboxpointer, module_, report_id, report_type, handlers, node_name=context.node_name,
+    def __init__(self, module_, report_id, report_type, handlers, node_name=context.node_name,
                  reporter_node='reporter', report_title=None, report_subtitle="", report_archived=True):
         # nodes and module
-        self.inboxpointer = inboxpointer
+        # self.inboxpointer = inboxpointer
         self.node_name =node_name
         self.reporter_node = reporter_node
         self.module_ = module_
@@ -115,20 +115,34 @@ class NewReportMaker:
         self.report_subtitle = report_subtitle
         self.report_archived = report_archived
         self.handlers = handlers
+        self.report_entries = list()
 
     # def make_new_report_entry(self, title, message_body, entry_id=None, actions=[]):
     #     return NewReportEntry(self.node_name, self.reporter_node, self.module_, self.report_type,
     #                           self.report_id, self.report_title, self.report_subtitle, self.handlers,
     #                           title, message_body, entry_id, actions)
     #
-    def append_new_report_entry(self, title, message_body, entry_id=None, actions=[]):
+    def append_report_entry(self, title, message_body, entry_id=None, actions=[]):
         new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type, self.report_id,
                                         self.report_title, self.report_subtitle, self.report_archived, self.handlers,
                                         title, message_body, entry_id, actions).get_dict()
+        self.report_entries.append(new_entry_dict)
 
-        message = Message(self.node_name, self.module_, self.reporter_node, 'namlat.modules.report_job','report',
-                           new_entry_dict )
-        message.send(self.inboxpointer)
+    def send_report_entry(self, title, message_body, entry_id=None, actions=[]):
+        new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type, self.report_id,
+                                        self.report_title, self.report_subtitle, self.report_archived, self.handlers,
+                                        title, message_body, entry_id, actions).get_dict()
+        message = Message([self.node_name, self.module_], [], 'report',
+                          [new_entry_dict])  # [[self.reporter_node, 'namlat.modules.report_job']]
+        message.send()
+
+    def send_report(self):
+        if len(self.report_entries) == 0:
+            return
+        message = Message([self.node_name, self.module_], [], 'report',
+                          list(self.report_entries))  # [[self.reporter_node, 'namlat.modules.report_job']]
+        message.send()
+        self.report_entries.clear()
 
 
 

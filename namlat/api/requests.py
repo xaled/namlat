@@ -1,5 +1,6 @@
 import requests
-import json
+# import json
+import kutils.json_serialize as json
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,19 +14,21 @@ def ping_request(server, node_name):
         return False
 
 
-def pull_request(server, last_commit_id):
+def pull_request(server, last_commit_id, node_name):
     try:
-        resp = requests.post(server+'/namlat/pull', data={'last_commit_id': last_commit_id})
-        return json.loads(resp.text)['updates_log']
+        resp = requests.post(server+'/namlat/pull', data={'last_commit_id': last_commit_id, "node_name": node_name})
+        data = json.loads(resp.text)
+        return data['updates_log'], data['mail_bag']
     except Exception as e:
         logger.error("Exception while sending pull request to server:%s", server, exc_info=True)
         return None
 
 
-def update_request(server, old_commit_id, update):
+def update_request(server, old_commit_id, update, outgoing_mail):
     try:
         resp = requests.post(server+'/namlat/update', data={'old_commit_id': old_commit_id,
-                                                            'update': json.dumps(update.get_request_dict())})
+                                                            'update': json.dumps(update.get_request_dict()),
+                                                            'outgoing_mail': json.dumps(outgoing_mail)})
         return json.loads(resp.text)['commit_id']
     except Exception as e:
         logger.error("Exception while sending pull request to server:%s", server, exc_info=True)

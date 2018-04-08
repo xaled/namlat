@@ -1,4 +1,5 @@
 - mvp:
+    - Redo reporting job and gui **
     - server/client:
         x run_flask_service, _pull_client_request, _update_client_request, threadproof
         x execute_job (load module)

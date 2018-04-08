@@ -76,11 +76,11 @@ def create_main(args):
     # address = nu.public_key_address(rsa_key.publickey())
     # logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
     data = JsonMinConnexion(path=args.data_path, template={'nodes': {},
-                                                           'public_keys': {}, 'inbox':{}}, indent=None)
+                                                           'public_keys': {}}, indent=None)
     secret = JsonMinConnexion(path=args.secret_path, template={})
     config = JsonMinConnexion(path=args.config_path, template={"jobs": {}})
     localdb = JsonMinConnexion(path=args.localdb_path, template={"jobs": {}, "is_master": is_master,
-                                                                "last_commit_id":""}, indent=None)
+                                                                "last_commit_id":"", 'inbox':{}}, indent=None)
     # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
     context.set_context(data, secret, rsa_key, args.name, config, localdb)
 

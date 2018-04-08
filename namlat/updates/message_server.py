@@ -1,47 +1,97 @@
 from namlat.context import context
+from threading import Lock
+import logging
+logger = logging.getLogger(__name__)
 
 
 class MessageServer:
     def __init__(self):
-        self.outgoing_stack = list()
-        self.forward_stack = list()
+        # self.outgoing_stack = list()
+        # self.outgoing_lock = Lock()
+        self.forward_stack = dict()
+        self.forward_lock = Lock()
         self.new_messages = set()
 
     def send(self, message):
-        self._transfer(message, True)
+        logger.debug("sending a message: %s.", message)
+        self._transfer(message)
 
-    def receive(self, message):
-        self._transfer(message, False)
+    def receive(self, message, forward=False):
+        logger.debug("receiving a message: %s.", message)
+        self._transfer(message, forward=forward)
 
-    def _transfer(self, message, outgoing):
-        if len(message.recepients) == 0:
-            recepients = get_message_recipients(message)
+    def _transfer(self, message, forward=True):
+        if len(message.recipients) == 0:
+            recipients = get_message_recipients(message)
+            if len(recipients) == 0:
+                # External Central routing
+                logger.debug("Storing the message in forward_stack before forwarding it to gateway")
+                recipient = 'server'
+                if forward:
+                    # with self.outgoing_lock:
+                        #     self.outgoing_stack.append(message)  # multiple append?
+                    with self.forward_lock:
+                        if not recipient in self.forward_stack:
+                            self.forward_stack[recipient] = list()
+                        self.forward_stack[recipient].append(message)
+                else:  # ignore?
+                    logger.info("Could not forward the message to %s!", recipient)
+                return
         else:
-            recepients = message.recepients
+            recipients = message.recipients
 
-        for recepient in recepients:
-            if recepient[0] == context.node_name:
+        for recipient in recipients:
+            message_copy = message.copy(recipient)
+            if recipient[0] == context.node_name:
+                logger.debug("Delevering the message locally to  module: %s", recipient[1])
                 # internal
                 with context.localdb:
-                    if recepient[1] not in context.localdb:
-                        context.localdb['inbox'][recepient[1]] = list()
-                    context.localdb['inbox'][recepient[1]].append(message)
-                self.new_messages.add(recepient[1])
+                    if 'inbox' not in context.localdb:
+                        context.localdb['inbox'] = dict()
+                    if recipient[1] not in context.localdb['inbox']:
+                        context.localdb['inbox'][recipient[1]] = dict()
+                    context.localdb['inbox'][recipient[1]][message_copy.uuid_] = message_copy
+                self.new_messages.add(recipient[1])
             else:
-                # external
-                if outgoing:
-                    self.outgoing_stack.append(message)
-                else:
-                    self.forward_stack.append(message)
+                # external (local routing)
+                logger.debug("Storing the message in forward_stack before forwarding it to: %s", recipient)
+                if forward:
+                    # with self.outgoing_lock:
+                        #     self.outgoing_stack.append(message)  # multiple append?
+                    with self.forward_lock:
+                        if not recipient[0] in self.forward_stack:
+                            self.forward_stack[recipient[0]] = list()
+                        self.forward_stack[recipient[0]].append(message_copy)
+                else:  # ignore?
+                    logger.info("Could not forward the message to %s!", recipient)
+
+    def get_mail_bag(self, node_name):  # server
+        if node_name in self.forward_stack:
+            with self.forward_lock:
+                ret = list(self.forward_stack[node_name])
+                self.forward_stack[node_name].clear()
+            if len(ret) > 0:
+                logger.info("Forwarding %d message to %s.", len(ret), node_name)
+                return ret
+        logger.debug("No message to forward to %s.", node_name)
+        return []
+
+    def get_outgoing_mail(self):  # client
+        with self.forward_lock:
+            ret = dict(self.forward_stack)
+            self.forward_stack.clear()
+        logger.info("Forwarding %d outgoing message to gateway.", len(ret))
+        return ret
 
 
 message_server = MessageServer()
 
+
 def get_message_recipients(message):
-    # hardcoded filtering rules  TODO:
+    # hardcoded filtering rules  TODO: Routage, explicit, local, central?
     if message.type == 'report':
-        return [('master', 'namlat.modules.report')]
+        return [('server', 'namlat.modules.report'), ('reporter', 'namlat.modules.report')]
     # other filtering rules:
 
-    # else: forward to master
-    return [('master', '_')]
+    # else: forward to master or not?
+    return []

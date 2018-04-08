@@ -1,22 +1,41 @@
 import time
+import uuid
+from kutils.json_serialize import JsonSerializable
+from kutils.time_ops import epoch_to_iso8601
 from namlat.updates.message_server import message_server
 
-class Message:
-    def __init__(self, from_node, from_module, to_node, to_module, type, content):
-        self.from_node = from_node
-        self.from_module = from_module
-        self.to_node = to_node
-        self.to_module = to_module
+
+class Message(JsonSerializable):
+    def __init__(self, sender, recipients, type, content, timestamp=None, uuid_=None):
+        self.sender = sender
+        self.recipients = recipients
         self.type = type
         self.content = content
-        self.timestamp = time.time()
+        if timestamp is None:
+            self.timestamp = time.time()
+        else:
+            self.timestamp = timestamp
+        if uuid_ is None:
+            self.uuid_ = uuid.uuid4().hex
+        else:
+            self.uuid_ = uuid_
 
-    def get_dict(self):
-        return dict(self.__dict__)
+    # def get_dict(self):
+    #     return dict(self.__dict__)
 
     # def send(self, inboxpointer):
-    def send(self, inboxpointer):
+    def send(self):
         message_server.send(self)
         # if self.to_node not in inboxpointer:
         #     inboxpointer[self.to_node] = list()
-        # inboxpointer[self.to_node].append(self.get_dict())
+        # inboxpointer[self.to_node].append(self.get_dict
+
+    def copy(self, recipient=None):
+        if recipient is None:
+            return Message(self.sender, self.recipients, self.type, self.content, self.timestamp, self.uuid_)
+        else:
+            return Message(self.sender, [recipient], self.type, self.content, self.timestamp, self.uuid_)
+
+    def __str__(self):
+        return "Message(%s, from:%s, to:%s, type:%s, %s)" % (self.uuid_, self.sender, self.recipients, self.type,
+                                                         epoch_to_iso8601(self.timestamp))

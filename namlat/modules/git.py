@@ -20,8 +20,8 @@ class GitJob(AbstractNamlatJob):
         #                                  handlers=nr.DAILY_MAIL_HANDLERS)
         # report_maker = nr.NewReportMaker(self.data, self.module_, "gitstatus", "Git cron report for host " + self.context.node_name,
         #                                  handlers=nr.DAILY_MAIL_HANDLERS)
-        report_maker = self.get_report_maker(None, "gitstatus", nr.DAILY_MAIL_HANDLERS, report_archived=False,
-                                             report_title="Git cron report for host " + self.context.node_name, )
+        report_maker = self.get_report_maker("gitstatus", "gitstatus", nr.DAILY_MAIL_HANDLERS, report_archived=False,
+                                             report_title="Git cron report for host " + self.context.node_name )
         for root_dir in self.kwargs['root-dirs']:
             logger.debug("processing root-dir:%s", root_dir)
             sub_dirs = [os.path.join(root_dir, child) for child in os.listdir(root_dir) if
@@ -32,10 +32,12 @@ class GitJob(AbstractNamlatJob):
                     remote_status, remote_message = _get_remote_status(dir)
                     logger.debug("%s: %s", dir, remote_message)
                     if not remote_status:
-                        self.report(dir, remote_message, report_maker=report_maker)
+                        report_maker.append_report_entry(dir, remote_message)
                     local_satus = _get_local_status(dir)
                     if not local_satus:
-                        self.report(dir, 'not all changes are commited', report_maker=report_maker)
+                        report_maker.append_report_entry(dir, 'not all changes are commited')
+
+        report_maker.send_report()
 
 
 def _get_cmd_output(command_vector):

@@ -1,5 +1,5 @@
 from namlat.context import context
-from namlat.updates import Message
+from namlat.updates.messages import Message
 from namlat.modules import AbstractNamlatJob
 import namlat.utils.mail
 import time
@@ -33,7 +33,7 @@ class ReportJob(AbstractNamlatJob):
                 handler.handler_executed()
         logger.debug("%d handlers executed", len(executed_handlers))
         if len(executed_handlers) > 0:
-            self.report("%d handlers executed" % len(executed_handlers), str(executed_handlers))
+            self.send_report_entry("%d handlers executed" % len(executed_handlers), str(executed_handlers))
         # save changes
         context.localdb.save()
 
@@ -44,66 +44,53 @@ class ReportJob(AbstractNamlatJob):
             self.data['reports'] = {'archive':{} , 'handlers_stack':{}}
         # for ad in self.data['new_reports']:
         #     for nrp in self.data['new_reports'][ad]:
-        for message in self.data['inbox'][context.node_name]:
-            if message['to_module'] == self.module_ and message['type'] == 'report':
-                to_remove.append(message)
-                nrp = message['content']
-                # report archive TODO: not for now
-                # report_archive = self.data['reports']['archive']
-                # if not ad in report_archive:
-                #     report_archive[ad] = dict()
-                # if not nrp['module_'] in report_archive:
-                #     report_archive[ad][nrp['module_']] = dict()
-                # if not nrp['report_type'] in report_archive[ad][nrp['module_']]:
-                #     report_archive[ad][nrp['module_']][nrp['report_type']] = dict()
-                #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
-                #     report_object_pointer['title'] = nrp['report_title']
-                #     report_object_pointer['subtitle'] = nrp['report_subtitle']
-                #     report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['module_'], nrp['report_type'])
-                #     report_object_pointer['entries'] = dict()
-                #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
-                # report_object_pointer['entries'][nrp['entry_id']] = nr.make_report_entry(nrp['entry_id'], nrp['title'],
-                #                                                                          nrp['message_body'])
+        for message in self.get_mail(type_='report'):
+            to_remove.append(message)
+            nrp = message['content']
+            # report archive TODO: not for now
+            # report_archive = self.data['reports']['archive']
+            # if not ad in report_archive:
+            #     report_archive[ad] = dict()
+            # if not nrp['module_'] in report_archive:
+            #     report_archive[ad][nrp['module_']] = dict()
+            # if not nrp['report_type'] in report_archive[ad][nrp['module_']]:
+            #     report_archive[ad][nrp['module_']][nrp['report_type']] = dict()
+            #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
+            #     report_object_pointer['title'] = nrp['report_title']
+            #     report_object_pointer['subtitle'] = nrp['report_subtitle']
+            #     report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['module_'], nrp['report_type'])
+            #     report_object_pointer['entries'] = dict()
+            #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
+            # report_object_pointer['entries'][nrp['entry_id']] = nr.make_report_entry(nrp['entry_id'], nrp['title'],
+            #                                                                          nrp['message_body'])
 
-                # handlers stack
-                if 'report_handlers_stack' not in  context.localdb:
-                    context.localdb['report_handlers_stack'] = dict()
-                handlers_stack = context.localdb['report_handlers_stack']
+            # handlers stack
+            if 'report_handlers_stack' not in  context.localdb:
+                context.localdb['report_handlers_stack'] = dict()
+            handlers_stack = context.localdb['report_handlers_stack']
 
-                for handler in nrp['handlers']:
-                    if not handler in handlers_stack:
-                        handlers_stack[handler] = {'entries': {}, 'last_execute':0.0}
+            for handler in nrp['handlers']:
+                if not handler in handlers_stack:
+                    handlers_stack[handler] = {'entries': {}, 'last_execute':0.0}
 
-                    #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
-                    # if nrp['report_id'] is None: # transient report:
-                    #     # uri = ""
-                    #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
-                    #                               nrp['report_id'], nrp['entry_id'])
-                    # else:
-                    #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
-                    #     #                                  nrp['report_id'])
-                    #     # uri = "/reports/%s" % nrp['report_id']
-                    key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
-                                                  'None', nrp['entry_id'])
-                    handlers_stack[handler]['entries'][key] = nrp.deep_copy() # dict(nrp)
-                    # handlers_stack[handler]['entries'][key]['uri'] = uri
-                    # handlers_stack[handler]['entries'][key]['node_name'] = ad
-
-                # Archive report for web app
-                if nrp['report_archived'] and nrp['report_id'] is not None:
-                    message = Message(self.context.node_name, self.module_, "master", "namlat.modules.report_web",
-                                      "report", nrp)
-                    message.send(self.data['inbox'])
-
-                # increment new reports count
-                new_reports_entries_count += 1
+                #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
+                # if nrp['report_id'] is None: # transient report:
+                #     # uri = ""
+                #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
+                #                               nrp['report_id'], nrp['entry_id'])
+                # else:
+                #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
+                #     #                                  nrp['report_id'])
+                #     # uri = "/reports/%s" % nrp['report_id']
+                key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
+                                              'None', nrp['entry_id'])
+                handlers_stack[handler]['entries'][key] = nrp.deep_copy() # dict(nrp)
+                # handlers_stack[handler]['entries'][key]['uri'] = uri
+                # handlers_stack[handler]['entries'][key]['node_name'] = ad
 
 
-
-        # clear new reports
-        for message in to_remove:
-            self.data['inbox'][context.node_name].remove(message)
-
+            # increment new reports count
+            new_reports_entries_count += 1
 
         logger.debug("processed %d new reports entries", new_reports_entries_count)
 

@@ -1,5 +1,6 @@
-from flask import Flask, Response, json, request
+from flask import Flask, Response, request #, json
 from threading import Lock, Thread
+import kutils.json_serialize as json
 from namlat.updates import get_update_from_request_dict
 import namlat.api.server as server
 import logging
@@ -46,10 +47,11 @@ def pull():
     logger.debug("received pull request")
     try:
         data_lock.acquire()
-        if 'last_commit_id' in request.form:
+        if 'last_commit_id' in request.form and 'node_name' in request.form:
             last_commit_id = request.form['last_commit_id']
-            updates_log = server.pull(last_commit_id)
-            resp_body = json.dumps({"updates_log":updates_log})
+            node_name = request.form['node_name']
+            updates_log, mail_bag = server.pull(last_commit_id, node_name)
+            resp_body = json.dumps({"updates_log": updates_log, "mail_bag": mail_bag})
             resp = Response(resp_body, status=200, mimetype='application/json')
             return resp
         else:
@@ -67,12 +69,15 @@ def update():
     logger.debug("received client update")
     try:
         data_lock.acquire()
-        if 'old_commit_id' in request.form and 'update' in request.form:
+        if 'old_commit_id' in request.form and 'update' in request.form \
+            and 'outgoing_mail' in request.form:
+            logger.debug("update request: %s", request.form)
+
             old_commit_id = request.form['old_commit_id']
-            logger.debug(request.form['update'])
+            outgoing_mail = json.loads(request.form['outgoing_mail'])
             update_request_dict = json.loads(request.form['update'])
             update = get_update_from_request_dict(update_request_dict)
-            commit_id = server.updati(old_commit_id, update)
+            commit_id = server.updati(old_commit_id, update, outgoing_mail)
             logger.debug("returning commit_id=%s", commit_id)
             resp_body = json.dumps({"commit_id":commit_id})
             resp = Response(resp_body, status=200, mimetype='application/json')

@@ -2,6 +2,7 @@ import logging
 from namlat.context import context
 from namlat.api.common import apply_update, apply_updates_log, calculate_commit_id, apply_sync_data
 from namlat.api.requests import pull_request, update_request, sync_request, create_node_request, ping_request
+from namlat.updates.message_server import message_server
 logger = logging.getLogger(__name__)
 
 def ping(server=None, node_name=None):
@@ -16,8 +17,10 @@ def ping(server=None, node_name=None):
 
 def pull():
     if 'gw' in context.config:
-        updates_log = pull_request(context.config['gw'], context.localdb['last_commit_id'])
-        logger.debug("pull_client received update_log: %s", updates_log)
+        updates_log, mail_bag = pull_request(context.config['gw'], context.localdb['last_commit_id'], context.node_name)
+        logger.debug("pull_client received update_log: %s, mail_bag: %s", updates_log, mail_bag)
+        for message in mail_bag:
+            message_server.receive(message, forward=False)
         if updates_log is not None:
             apply_updates_log(updates_log)
         else:
@@ -26,7 +29,8 @@ def pull():
 
 def updati(update):
     if 'gw' in context.config:
-        commit_id = update_request(context.config['gw'], context.localdb['last_commit_id'], update)
+        commit_id = update_request(context.config['gw'], context.localdb['last_commit_id'],
+                                   update, message_server.get_outgoing_mail())
         logger.debug("received commit_id=%s", commit_id)
         if commit_id is not None:
             apply_update(update, commit_id)
