@@ -1,18 +1,28 @@
-from namlat.context import context
-from namlat.updates.messages import Message
-from namlat.modules import AbstractNamlatJob
-import namlat.utils.mail
+import sys
+import os
+import jinja2
 import time
 import logging as _logging
-import sys, os
-import jinja2
+from namlat.context import context
+from namlat.utils.data import deep_copy
+from namlat.utils.flask import FlaskRulesContainer
+from namlat.modules import AbstractNamlatJob
+import namlat.utils.mail
+
 
 script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(script_path))
 # print(jinja_env.get_template("test.tpl").render(name="xaled"))
 MAIL_TEMPLATE = 'templates/mail_report.tpl'
-
+flask_rule_container = FlaskRulesContainer()
 logger = _logging.getLogger(__name__)
+with context.localdb:
+    if 'modules' not in context.localdb:
+        context.localdb['modules'] = dict()
+    if __name__ not in context.localdb['modules']:
+        context.localdb['modules'][__name__] = dict()
+
+module_db = context.localdb['modules'][__name__]
 
 
 class ReportJob(AbstractNamlatJob):
@@ -40,13 +50,13 @@ class ReportJob(AbstractNamlatJob):
     def process_new_entries(self):
         new_reports_entries_count = 0
         to_remove = list()
-        if 'reports' not in self.data:
-            self.data['reports'] = {'archive':{} , 'handlers_stack':{}}
+        # if 'reports' not in self.data:
+        #     self.data['reports'] = {'archive': {}, 'handlers_stack': {}}
         # for ad in self.data['new_reports']:
         #     for nrp in self.data['new_reports'][ad]:
-        for message in self.get_mail(type_='report'):
+        for k, message in self.get_mail(type_='report').items():
             to_remove.append(message)
-            nrp = message['content']
+            # nrp_ = message.content
             # report archive TODO: not for now
             # report_archive = self.data['reports']['archive']
             # if not ad in report_archive:
@@ -65,32 +75,33 @@ class ReportJob(AbstractNamlatJob):
             #                                                                          nrp['message_body'])
 
             # handlers stack
-            if 'report_handlers_stack' not in  context.localdb:
+            if 'report_handlers_stack' not in context.localdb:
                 context.localdb['report_handlers_stack'] = dict()
+
             handlers_stack = context.localdb['report_handlers_stack']
+            for nrp in message.content:
+                for handler in nrp['handlers']:
+                    if not handler in handlers_stack:
+                        handlers_stack[handler] = {'entries': {}, 'last_execute': 0.0}
 
-            for handler in nrp['handlers']:
-                if not handler in handlers_stack:
-                    handlers_stack[handler] = {'entries': {}, 'last_execute':0.0}
-
-                #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
-                # if nrp['report_id'] is None: # transient report:
-                #     # uri = ""
-                #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
-                #                               nrp['report_id'], nrp['entry_id'])
-                # else:
-                #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
-                #     #                                  nrp['report_id'])
-                #     # uri = "/reports/%s" % nrp['report_id']
-                key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
-                                              'None', nrp['entry_id'])
-                handlers_stack[handler]['entries'][key] = nrp.deep_copy() # dict(nrp)
-                # handlers_stack[handler]['entries'][key]['uri'] = uri
-                # handlers_stack[handler]['entries'][key]['node_name'] = ad
+                    #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
+                    # if nrp['report_id'] is None: # transient report:
+                    #     # uri = ""
+                    #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
+                    #                               nrp['report_id'], nrp['entry_id'])
+                    # else:
+                    #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
+                    #     #                                  nrp['report_id'])
+                    #     # uri = "/reports/%s" % nrp['report_id']
+                    key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
+                                                  'None', nrp['entry_id'])
+                    handlers_stack[handler]['entries'][key] = deep_copy(nrp) # dict(nrp)
+                    # handlers_stack[handler]['entries'][key]['uri'] = uri
+                    # handlers_stack[handler]['entries'][key]['node_name'] = ad
 
 
-            # increment new reports count
-            new_reports_entries_count += 1
+                # increment new reports count
+                new_reports_entries_count += 1
 
         logger.debug("processed %d new reports entries", new_reports_entries_count)
 
@@ -220,4 +231,17 @@ class ReportEntry:
         self.entry_id = entry_id
         self.actions = actions
 
+
+def get_flask_rules():
+    return flask_rule_container.rules
+
+
+@flask_rule_container.route('/')
+def view_reports_root():
+    return str()
+
+
+@flask_rule_container.route('/<node>/<modul>/<report_type>/<report_id>')
+def view_reports_by_type_and_id(node, module, report_type, report_id):
+    pass
 
