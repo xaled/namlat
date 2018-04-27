@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>list buttons</title>
+</head>
+<body>
+    <ul>
+    {% for button in buttons %}
+    <li><a href="{{ 'buttons/' + button }}">{{ button }}</a></li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
