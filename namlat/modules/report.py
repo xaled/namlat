@@ -3,10 +3,11 @@ import os
 import jinja2
 import time
 import logging as _logging
+from flask import render_template
 from namlat.context import context
 from namlat.utils.data import deep_copy
 from namlat.utils.flask import FlaskRulesContainer
-from namlat.modules import AbstractNamlatJob
+from namlat.modules import AbstractNamlatJob, get_mail
 import namlat.utils.mail
 
 
@@ -20,9 +21,10 @@ with context.localdb:
     if 'modules' not in context.localdb:
         context.localdb['modules'] = dict()
     if __name__ not in context.localdb['modules']:
-        context.localdb['modules'][__name__] = dict()
-
+        context.localdb['modules'][__name__] = {'archive': {}, 'handlers_stack': {}}
 module_db = context.localdb['modules'][__name__]
+handlers_stack = module_db['handlers_stack']
+archive = module_db['archive']
 
 
 class ReportJob(AbstractNamlatJob):
@@ -31,7 +33,7 @@ class ReportJob(AbstractNamlatJob):
 
     def execute(self):
         logger.info("executing ReportJob")
-        self.process_new_entries()
+        process_new_entries()
         executed_handlers = []
         for handler in self.get_report_handlers():
             if time.time() > handler.last_execute() + handler.period and handler.has_entries():
@@ -46,64 +48,6 @@ class ReportJob(AbstractNamlatJob):
             self.send_report_entry("%d handlers executed" % len(executed_handlers), str(executed_handlers))
         # save changes
         context.localdb.save()
-
-    def process_new_entries(self):
-        new_reports_entries_count = 0
-        to_remove = list()
-        # if 'reports' not in self.data:
-        #     self.data['reports'] = {'archive': {}, 'handlers_stack': {}}
-        # for ad in self.data['new_reports']:
-        #     for nrp in self.data['new_reports'][ad]:
-        for k, message in self.get_mail(type_='report').items():
-            to_remove.append(message)
-            # nrp_ = message.content
-            # report archive TODO: not for now
-            # report_archive = self.data['reports']['archive']
-            # if not ad in report_archive:
-            #     report_archive[ad] = dict()
-            # if not nrp['module_'] in report_archive:
-            #     report_archive[ad][nrp['module_']] = dict()
-            # if not nrp['report_type'] in report_archive[ad][nrp['module_']]:
-            #     report_archive[ad][nrp['module_']][nrp['report_type']] = dict()
-            #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
-            #     report_object_pointer['title'] = nrp['report_title']
-            #     report_object_pointer['subtitle'] = nrp['report_subtitle']
-            #     report_object_pointer['uri'] = "/reports/%s/%s/%s" % (ad, nrp['module_'], nrp['report_type'])
-            #     report_object_pointer['entries'] = dict()
-            #     report_object_pointer = report_archive[ad][nrp['module_']][nrp['report_type']]
-            # report_object_pointer['entries'][nrp['entry_id']] = nr.make_report_entry(nrp['entry_id'], nrp['title'],
-            #                                                                          nrp['message_body'])
-
-            # handlers stack
-            if 'report_handlers_stack' not in context.localdb:
-                context.localdb['report_handlers_stack'] = dict()
-
-            handlers_stack = context.localdb['report_handlers_stack']
-            for nrp in message.content:
-                for handler in nrp['handlers']:
-                    if not handler in handlers_stack:
-                        handlers_stack[handler] = {'entries': {}, 'last_execute': 0.0}
-
-                    #key = report_object_pointer['uri'] + "#" + nrp['entry_id']
-                    # if nrp['report_id'] is None: # transient report:
-                    #     # uri = ""
-                    #     key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
-                    #                               nrp['report_id'], nrp['entry_id'])
-                    # else:
-                    #     # uri =  "/reports/%s/%s/%s/%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
-                    #     #                                  nrp['report_id'])
-                    #     # uri = "/reports/%s" % nrp['report_id']
-                    key = "/%s/%s/%s/%s#%s" %(nrp['node_name'], nrp['module_'], nrp['report_type'],
-                                                  'None', nrp['entry_id'])
-                    handlers_stack[handler]['entries'][key] = deep_copy(nrp) # dict(nrp)
-                    # handlers_stack[handler]['entries'][key]['uri'] = uri
-                    # handlers_stack[handler]['entries'][key]['node_name'] = ad
-
-
-                # increment new reports count
-                new_reports_entries_count += 1
-
-        logger.debug("processed %d new reports entries", new_reports_entries_count)
 
     def get_report_handlers(self):
         handlers = list()
@@ -125,12 +69,10 @@ class ReportJob(AbstractNamlatJob):
 class Handler:
     def __init__(self, jobargs, handler_class, period, period_name):
         self.handler_id = handler_class + "_" + period_name
-        if 'report_handlers_stack' not in context.localdb:
-            context.localdb['report_handlers_stack'] = dict()
-        handlers_stack = context.localdb['report_handlers_stack']
-        if not self.handler_id in handlers_stack:
-            context.localdb['report_handlers_stack'][self.handler_id] = {'entries': {}, 'last_execute': 0.0}
-        self.pointer = context.localdb['report_handlers_stack'][self.handler_id]
+        with context.localdb:
+            if not self.handler_id in handlers_stack:
+                handlers_stack[self.handler_id] = {'entries': {}, 'last_execute': 0.0}
+        self.pointer = handlers_stack[self.handler_id]
         self.period = period
         self.period_name = period_name
         self.jobargs = jobargs
@@ -146,16 +88,9 @@ class Handler:
         return self.pointer['last_execute']
 
     def handler_executed(self):
-        self.pointer['last_execute'] = time.time()
-        # for entry in self.pointer['entries'].values(): # TODO: not for now, continue archiving (Later)
-        #     try:
-        #         report_object_pointer = self.data['reports']['archive'][entry['node_name']][entry['module_']][
-        #             entry['report_type']]
-        #         if 'report_id' not in report_object_pointer:
-        #             report_object_pointer['report_id'] = entry['report_id']
-        #     except Exception as e:
-        #         logger.error("error while updating report_id: " + str(e), exc_info=True)
-        self.pointer['entries'].clear()
+        with context.localdb:
+            self.pointer['last_execute'] = time.time()
+            self.pointer['entries'].clear()
 
     def parse_entries(self):
         self.reports = dict()
@@ -232,16 +167,46 @@ class ReportEntry:
         self.actions = actions
 
 
+def process_new_entries():
+    new_reports_entries_count = 0
+    for k, message in get_mail(__name__, type_='report').items():
+        for nrp in message.content:
+            nrp_copy = deep_copy(nrp)
+            with context.localdb:
+                key = "/%s/%s/%s/%s#%s" % (nrp['node_name'], nrp['module_'], nrp['report_type'],
+                                           nrp['report_id'], nrp['entry_id'])
+                # archive
+                archive[key] = nrp_copy
+
+                # handler stack
+                for handler in nrp['handlers']:
+                        if handler not in handlers_stack:
+                            handlers_stack[handler] = {'entries': {}, 'last_execute': 0.0}
+                        handlers_stack[handler]['entries'][key] = nrp_copy # dict(nrp)
+
+            # increment new reports count
+            new_reports_entries_count += 1
+
+    logger.debug("processed %d new reports entries", new_reports_entries_count)
+
+
+def mail_hook():
+    logger.debug("mail_hook()")
+    process_new_entries()
+
+
 def get_flask_rules():
     return flask_rule_container.rules
 
 
 @flask_rule_container.route('/')
 def view_reports_root():
-    return str()
+    reports = list(archive.values())
+    keys = list(reports[0].keys())
+    return render_template("report/reports.html", keys=keys, reports=reports)
 
 
 @flask_rule_container.route('/<node>/<modul>/<report_type>/<report_id>')
 def view_reports_by_type_and_id(node, module, report_type, report_id):
-    pass
+    return node + module + report_type + report_id
 

@@ -1,12 +1,19 @@
-from flask import Flask, Response, request #, json
+from flask import Flask, Response, request, url_for, render_template #, json
+import jinja2
 from threading import Lock, Thread
 import kutils.json_serialize as json
+from namlat.config import JINJA2_TEMPLATE_DIR
+from namlat.context import context
 from namlat.updates import get_update_from_request_dict
+from namlat.modules import get_module_route_rules
 import namlat.api.server as server
 import logging
 logger = logging.getLogger(__name__)
 
 data_lock = Lock() # Todo: threadsafe only if there is one server/master that is jobless
+APP_ROOT = ''
+# CORE_PATH = '/core'
+MODULES_PATH = ''
 app = Flask(__name__)
 
 
@@ -14,6 +21,21 @@ def server_main(args=None):
     if args is not None:
         from namlat import load_data
         load_data(args)
+    if 'modules' in context.config:
+        for module_ in context.config['modules']:
+            try:
+                module_path = APP_ROOT + MODULES_PATH + '/' + module_
+                module_rules = get_module_route_rules(module_)
+                for rule in module_rules:
+                    app.add_url_rule(module_path + rule['rule'], rule['endpoint'], rule['view_func'], **rule['options'])
+                logger.debug("added %d flask rule for module: %s.", len(module_rules), module_path)
+            except:
+                logger.error("Unable to load gui routes for module: %s", module_, exc_info=True)
+    my_loader = jinja2.ChoiceLoader([
+        app.jinja_loader,
+        jinja2.FileSystemLoader([JINJA2_TEMPLATE_DIR]),
+    ])
+    app.jinja_loader = my_loader
     app.run()
 
 
@@ -29,7 +51,26 @@ def error_400():
     return resp
 
 
-@app.route('/namlat/ping', methods=['POST'])
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
+
+
+@app.route(APP_ROOT + "/site-map")
+def site_map():
+    links = []
+    for rule in app.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+        if "GET" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint, **(rule.defaults or {}))
+            links.append((url, rule.endpoint))
+    # links is now a list of url, endpoint tuples
+    return render_template("site_map.html", links=links)
+
+
+@app.route(APP_ROOT + '/namlat/ping', methods=['POST'])
 def ping():
     with data_lock:
         logger.debug("received ping request")
@@ -42,7 +83,7 @@ def ping():
             return error_400()
 
 
-@app.route('/namlat/pull', methods=['POST'])
+@app.route(APP_ROOT + '/namlat/pull', methods=['POST'])
 def pull():
     logger.debug("received pull request")
     try:
@@ -64,7 +105,7 @@ def pull():
         data_lock.release()
 
 
-@app.route('/namlat/update', methods=['POST'])
+@app.route(APP_ROOT + '/namlat/update', methods=['POST'])
 def update():
     logger.debug("received client update")
     try:
@@ -92,7 +133,7 @@ def update():
         data_lock.release()
 
 
-@app.route('/namlat/sync', methods=['GET'])
+@app.route(APP_ROOT + '/namlat/sync', methods=['GET'])
 def sync():
     logger.debug("received client sync")
     try:
@@ -108,7 +149,7 @@ def sync():
         data_lock.release()
 
 
-@app.route('/namlat/createNode', methods=['POST'])
+@app.route(APP_ROOT + '/namlat/createNode', methods=['POST'])
 def create_node():
     logger.debug("received client sync")
     try:

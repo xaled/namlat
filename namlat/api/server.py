@@ -92,7 +92,9 @@ def create_server(public_key, node_name):
 
 def _create_node(public_key, node_name):
     edit_data = EditDict(context.data)
-    edit_data['inbox'][node_name] = []
+    # edit_data['inbox'][node_name] = []
+    # with context.localdb:
+    #     context.localdb['inbox'][node_name] = []
     try:
         edit_data['public_keys'][node_name] = public_key.decode()
     except:

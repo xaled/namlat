@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-s', '--server', action="store_true", default=False)
     parser.add_argument('-y', '--sync', action="store_true", default=False)
-    parser.add_argument('-c', '--create', action="store_true", default=False)
+    parser.add_argument('--create', action="store_true", default=False)
     parser.add_argument('-f', '--force-create', action="store_true", default=False)
     parser.add_argument('-C', '--cron', action="store_true", default=False)
     parser.add_argument('-d', '--debug', action="store_true", default=False)
@@ -71,10 +71,10 @@ if __name__ == "__main__":
 
 
     if args.debug:
-        configure_logging(level="DEBUG", modules=["kutils", "namlat"])
+        configure_logging(level="DEBUG", modules=["kutils", "namlat", "werkzeug"])
         # logging.basicConfig(level=logging.DEBUG)
     else:
-        configure_logging(level="INFO", modules=["kutils", "namlat"])
+        configure_logging(level="INFO", modules=["kutils", "namlat", "werkzeug"])
         # logging.basicConfig(level=logging.INFO)
 
     try:

@@ -1,4 +1,5 @@
 from namlat.context import context
+import importlib
 from threading import Lock
 import logging
 logger = logging.getLogger(__name__)
@@ -11,6 +12,7 @@ class MessageServer:
         self.forward_stack = dict()
         self.forward_lock = Lock()
         self.new_messages = set()
+        self.new_messages_lock = Lock()
 
     def send(self, message):
         logger.debug("sending a message: %s.", message)
@@ -51,7 +53,8 @@ class MessageServer:
                     if recipient[1] not in context.localdb['inbox']:
                         context.localdb['inbox'][recipient[1]] = dict()
                     context.localdb['inbox'][recipient[1]][message_copy.uuid_] = message_copy
-                self.new_messages.add(recipient[1])
+                with self.new_messages_lock:
+                    self.new_messages.add(recipient[1])
             else:
                 # external (local routing)
                 logger.debug("Storing the message in forward_stack before forwarding it to: %s", recipient)
@@ -64,6 +67,19 @@ class MessageServer:
                         self.forward_stack[recipient[0]].append(message_copy)
                 else:  # ignore?
                     logger.info("Could not forward the message to %s!", recipient)
+
+        # call modules hooks
+        self.call_modules_hooks()
+
+    def call_modules_hooks(self):
+        with self.new_messages_lock:
+            for module_name in self.new_messages:
+                module_ = importlib.import_module(module_name)
+                if 'mail_hook' in module_.__dict__ and callable(module_.__dict__['mail_hook']):
+                    logger.debug("calling mail_hook from module: %s." % module_name)
+                    module_.__dict__['mail_hook']()
+
+            self.new_messages.clear()
 
     def get_mail_bag(self, node_name):  # server
         if node_name in self.forward_stack:
@@ -95,3 +111,18 @@ def get_message_recipients(message):
 
     # else: forward to master or not?
     return []
+
+
+def get_mail(module_, keep=False, type_=None):
+    mails = dict()
+    inbox = context.localdb['inbox']
+    if module_ in inbox:
+        mails = {k: inbox[module_][k]
+                 for k in inbox[module_]
+                 if type_ is None or inbox[module_][k].type == type_}
+        if not keep:
+            with context.localdb:
+                for k in mails:
+                    del inbox[module_][k]
+    logger.debug("get_mail for module:%s returned %d mails.", module_, len(mails))
+    return mails

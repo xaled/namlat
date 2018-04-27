@@ -122,13 +122,15 @@ class NewReportMaker:
     #                           self.report_id, self.report_title, self.report_subtitle, self.handlers,
     #                           title, message_body, entry_id, actions)
     #
-    def append_report_entry(self, title, message_body, entry_id=None, actions=[]):
+    def append_report_entry(self, title, message_body, entry_id=None, actions=None):
+        actions = actions or list()
         new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type, self.report_id,
                                         self.report_title, self.report_subtitle, self.report_archived, self.handlers,
                                         title, message_body, entry_id, actions).get_dict()
         self.report_entries.append(new_entry_dict)
 
-    def send_report_entry(self, title, message_body, entry_id=None, actions=[]):
+    def send_report_entry(self, title, message_body, entry_id=None, actions=None):
+        actions = actions or list()
         new_entry_dict = NewReportEntry(self.node_name, self.module_, self.report_type, self.report_id,
                                         self.report_title, self.report_subtitle, self.report_archived, self.handlers,
                                         title, message_body, entry_id, actions).get_dict()

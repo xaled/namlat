@@ -125,7 +125,10 @@ def get_jobs():
         try:
             last_executed = context.localdb['jobs'][job_id]['last_executed']
         except:
-            context.localdb['jobs'][job_id]= {'last_executed':0.0}
+            with context.localdb:
+                if not 'jobs' in context.localdb:
+                    context.localdb['jobs'] = {}
+                context.localdb['jobs'][job_id]= {'last_executed':0.0}
             last_executed = 0.0
         if time() - last_executed > job['period']:
             job_ = dict(job)
