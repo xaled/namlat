@@ -1,10 +1,17 @@
 import os
 import sys
-
+VERSION = "0.1.0rc9"
 if sys.argv[0] == '':
     SCRIPT_DIR = os.path.realpath(sys.argv[0])
 else:
     SCRIPT_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-JINJA2_TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
-DATA_DIR = os.path.join(SCRIPT_DIR, "data")
+LIB_DIR = os.path.dirname(os.path.realpath(__file__))
+JINJA2_TEMPLATE_DIR = os.path.join(LIB_DIR, "templates")
+
+_is_root = os.geteuid() == 0  # TODO: windows
+if _is_root:  # TODO: windows
+    NAMLAT_HOME_DIR = '/var/lib/namlat'
+else:
+    NAMLAT_HOME_DIR = os.path.join(os.path.expanduser('~'), '.namlat')
+DATA_DIR = os.path.join(NAMLAT_HOME_DIR, "data")
 SLEEP = 20

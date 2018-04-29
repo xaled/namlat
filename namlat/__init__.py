@@ -3,7 +3,7 @@ from Crypto.PublicKey import RSA
 from time import sleep, time
 import os
 import importlib
-from kutils.json_min_db import JsonMinConnexion
+from xaled_utils.json_min_db import JsonMinConnexion
 import logging
 from namlat.context import context
 from namlat.config import SLEEP

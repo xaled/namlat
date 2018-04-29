@@ -1,7 +1,7 @@
 import time
 import uuid
-from kutils.json_serialize import JsonSerializable
-from kutils.time_ops import epoch_to_iso8601
+from xaled_utils.json_serialize import JsonSerializable
+from xaled_utils.time_ops import epoch_to_iso8601
 from namlat.updates.message_server import message_server
 
 

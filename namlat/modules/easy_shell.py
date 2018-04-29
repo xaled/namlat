@@ -2,7 +2,7 @@ import logging as _logging
 from flask import render_template
 from namlat.context import context
 from namlat.utils.flask import FlaskRulesContainer
-from kutils.commands import run_command_ex1
+from xaled_utils.commands import run_command_ex1
 
 flask_rule_container = FlaskRulesContainer()
 logger = _logging.getLogger(__name__)

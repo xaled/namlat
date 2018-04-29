@@ -1,7 +1,7 @@
 from flask import Flask, Response, request, url_for, render_template #, json
 import jinja2
 from threading import Lock, Thread
-import kutils.json_serialize as json
+import xaled_utils.json_serialize as json
 from namlat.config import JINJA2_TEMPLATE_DIR
 from namlat.context import context
 from namlat.updates import get_update_from_request_dict
@@ -36,7 +36,7 @@ def server_main(args=None):
         jinja2.FileSystemLoader([JINJA2_TEMPLATE_DIR]),
     ])
     app.jinja_loader = my_loader
-    app.run()
+    app.run('0.0.0.0', debug=True, threaded=True, use_reloader=False)
 
 
 def server_main_threaded():

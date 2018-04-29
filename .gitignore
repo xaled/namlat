@@ -9,3 +9,5 @@ output/
 *~
 *.pem
 data/
+build/
+dist/

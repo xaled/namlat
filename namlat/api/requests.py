@@ -1,6 +1,6 @@
 import requests
 # import json
-import kutils.json_serialize as json
+import xaled_utils.json_serialize as json
 import logging
 logger = logging.getLogger(__name__)
 
