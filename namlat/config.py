@@ -1,6 +1,6 @@
 import os
 import sys
-VERSION = "0.1.0rc9"
+VERSION = "0.1.0rc11"
 if sys.argv[0] == '':
     SCRIPT_DIR = os.path.realpath(sys.argv[0])
 else:

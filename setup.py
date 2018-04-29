@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from distutils.core import setup
-from namlat.config import VERSION
 
 import os
 
@@ -21,7 +20,7 @@ extra_files = package_files('namlat/')
 
 setup(
     name='namlat',
-    version=VERSION,
+    version="0.1.0rc11",
     # major.minor.fix: MAJOR incompatible API changes, MINOR add backwards-compatible functionality, FIX bug fixes
     description='Distributed Monitoring and Reporting.',
     long_description='Distributed Monitoring and Reporting.',
