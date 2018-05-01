@@ -10,4 +10,4 @@ output/
 *.pem
 data/
 build/
-dist/
+./dist/
