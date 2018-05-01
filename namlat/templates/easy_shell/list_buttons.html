@@ -11,9 +11,10 @@
 {% block main_content %}
             <div class="row">
                 {% for button in buttons %}
-                <div class="col-sm-4">
+                <div class="col-md-4">
                     <a href="{{ 'buttons/' + button }}">
-                        <button type="button" class="btn btn-primary btn-lg btn-block">{{ button }}</button>
+                        <button type="button" class="btn btn-primary btn-lg btn-block">
+                            <i class="fa fa-cog"></i> {{ button }}</button>
                     </a>
                 </div>
                 {% endfor %}
