@@ -1,0 +1,21 @@
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            {% block content_header %}
+            <h1>
+                {{ title }}:
+            </h1>
+            {% endblock %}
+
+        </section>
+
+
+        <!-- Main content -->
+        <section class="content">
+            {% block main_content %}
+            {% endblock %}
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->

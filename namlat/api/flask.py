@@ -1,8 +1,8 @@
-from flask import Flask, Response, request, url_for, render_template #, json
+from flask import Flask, Response, request, url_for, render_template, send_from_directory #, json
 import jinja2
 from threading import Lock, Thread
 import xaled_utils.json_serialize as json
-from namlat.config import JINJA2_TEMPLATE_DIR
+from namlat.config import JINJA2_TEMPLATE_DIR, WEB_STATIC_DIR
 from namlat.context import context
 from namlat.updates import get_update_from_request_dict
 from namlat.modules import get_module_route_rules
@@ -176,3 +176,14 @@ def create_node():
         return error_400()
     finally:
         data_lock.release()
+
+
+@app.route(APP_ROOT + '/plugins/<path:path>')
+@app.route(APP_ROOT + '/bower_components/<path:path>')
+@app.route(APP_ROOT + '/dist/<path:path>')
+def static_ressource(path):
+    # logger.debug("path:%s", path)
+    dir = request.path.split('/')[1]
+    # logger.debug("dir: %s", dir)
+    # logger.debug("sent: %s, %s", WEB_STATIC_DIR + dir, path)
+    return send_from_directory(WEB_STATIC_DIR + dir, path)

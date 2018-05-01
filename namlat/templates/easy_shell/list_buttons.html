@@ -1,14 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>list buttons</title>
-</head>
-<body>
-    <ul>
-    {% for button in buttons %}
-    <li><a href="{{ 'buttons/' + button }}">{{ button }}</a></li>
-    {% endfor %}
-    </ul>
-</body>
-</html>
+{% extends "base.html" %}
+{% block main_sidebar %}
+{% endblock %}
+{% block content_header %}
+            <h1>
+                {{ title }}:
+            </h1>
+{% endblock %}
+{% block main_header %}
+{% endblock %}
+{% block main_content %}
+            <div class="row">
+                {% for button in buttons %}
+                <div class="col-sm-4">
+                    <a href="{{ 'buttons/' + button }}">
+                        <button type="button" class="btn btn-primary btn-lg btn-block">{{ button }}</button>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- /.row -->
+{% endblock %}

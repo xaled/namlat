@@ -1,12 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ button }}</title>
-</head>
-<body>
-<h1>{{ button }} <small>return_code: {{ return_code }}</small></h1>
-<pre>{{ output }}</pre>
+{% extends "base.html" %}
+{% block main_sidebar %}
+{% endblock %}
+{% block content_header %}
+<h1>
+    {{ title }}:
+</h1>
+{% endblock %}
+{% block main_header %}
+{% endblock %}
+{% block main_content %}
+<div class="row">
+    <div class="col-sm">
+        <div class="box box-solid">
+            <div class="box-header with-border">
+                <i class="fa fa-terminal"></i>
 
-</body>
-</html>
+                <h3 class="box-title">{{ button }} <small>return_code: {{ return_code }}</small></h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body clearfix">
+                <pre>{{ output }}</pre>
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+    </div>
+    <!-- ./col -->
+    {% for button in buttons %}
+    <div class="col-sm-4">
+        <a href="{{ 'buttons/' + button }}">
+            <button type="button" class="btn btn-primary btn-lg btn-block">{{ button }}</button>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+<!-- /.row -->
+{% endblock %}
