@@ -57,6 +57,7 @@ def has_no_empty_params(rule):
     return len(defaults) >= len(arguments)
 
 
+@app.route(APP_ROOT + "/")
 @app.route(APP_ROOT + "/site-map")
 def site_map():
     links = []
