@@ -1,17 +1,8 @@
 {% extends "base.html" %}
-{% block main_sidebar %}
-{% endblock %}
-{% block content_header %}
-            <h1>
-                {{ title }}:
-            </h1>
-{% endblock %}
-{% block main_header %}
-{% endblock %}
-{% block main_content %}
+{% block main_content_body %}
             <div class="row">
                 {% for button in buttons %}
-                <div class="col-md-4">
+                <div class="col-md-3 mb-3 mb-md-0">
                     <a href="{{ 'buttons/' + button }}">
                         <button type="button" class="btn btn-primary btn-lg btn-block">
                             <!--<i class="fa fa-cog">--></i> {{ button }}</button>

@@ -1,0 +1,18 @@
+{
+   "jobs": {},
+   "modules": {
+      "namlat.modules.report":{},
+      "namlat.modules.easy_shell":{
+         "buttons":[
+            {
+               "name": "ls",
+               "cmd_vector" : ["ls", "-alh"]
+            },
+            {
+               "name": "df",
+               "cmd_vector" : ["df", "-h"]
+            }
+         ]
+      }
+   }
+}

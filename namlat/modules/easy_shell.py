@@ -38,13 +38,13 @@ def easy_shell_index():
         for button in module_config['buttons']:
             buttons.append(button['name'])
 
-    return render_template("easy_shell/list_buttons.html", title="EasyShell Buttons", buttons=buttons)
+    return render_template("easy_shell/list_buttons.html", title="EasyShell", section_title="Buttons", buttons=buttons)
 
 
 @flask_rule_container.route('/buttons/<button_name>')
 def button_view(button_name):
     button = _get_button(button_name)
     return_code, output = run_command_ex1(button['cmd_vector'])
-    return render_template("easy_shell/button_view.html", title="EasyShell: " +button_name, button=button_name,
+    return render_template("easy_shell/button_view.html", title="EasyShell", subtitle=button_name, button=button_name,
                            output=output.decode(), return_code=return_code)
 

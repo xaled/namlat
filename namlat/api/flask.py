@@ -181,6 +181,9 @@ def create_node():
 @app.route(APP_ROOT + '/plugins/<path:path>')
 @app.route(APP_ROOT + '/bower_components/<path:path>')
 @app.route(APP_ROOT + '/dist/<path:path>')
+@app.route(APP_ROOT + '/css/<path:path>')
+@app.route(APP_ROOT + '/js/<path:path>')
+@app.route(APP_ROOT + '/img/<path:path>')
 def static_ressource(path):
     # logger.debug("path:%s", path)
     dir = request.path.split('/')[1]
