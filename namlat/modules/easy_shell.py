@@ -45,6 +45,6 @@ def easy_shell_index():
 def button_view(button_name):
     button = _get_button(button_name)
     return_code, output = run_command_ex1(button['cmd_vector'])
-    return render_template("easy_shell/button_view.html", title="EasyShell", subtitle=button_name, button=button_name,
+    return render_template("easy_shell/button_view.html", title="EasyShell", button=button_name,
                            output=output.decode(), return_code=return_code)
 
