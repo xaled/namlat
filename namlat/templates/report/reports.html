@@ -1,23 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <table>
-        <th>
-            {% for k in keys %}
-            <td>{{ k }}</td>
-            {% endfor %}
-        </th>
-        {% for r in reports %}
-        <tr>
-            {% for k in keys %}
-            <td>{{ r[k] }}</td>
-            {% endfor %}
-        {% endfor %}
-        </tr>
-    </table>
-</body>
-</html>
+{% extends "base.html" %}
+{% block main_content_body %}
+<div class="row">
+    <div class="col">
+        <div class="table-responsive table-hover">
+            <table class="table">
+                <thead>
+                <tr>
+                    {% for k in report.__dict__.keys() %}
+                    <th>{{ k }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    {% for k in report.__dict__.keys() %}
+                    {% if k != 'report_entries' %}
+                    <td>{{ report.__dict__[k] }}</td>
+                    {% endif %}
+                    {% endfor %}
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-responsive table-hover">
+            <table class="table">
+                <thead>
+                <tr>
+                    {% for k in keys %}
+                    <th>{{ k }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for r in report.report_entries %}
+                <tr>
+                    {% for k in keys %}
+                    <td>{{ r.__dict__[k] }}</td>
+                    {% endfor %}
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- /.row -->
+{% endblock %}

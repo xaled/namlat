@@ -27,10 +27,10 @@ class AbstractNamlatJob:
         self.data = EditDict(self.context.data)
         self.module_ = module_
         self.class_ = class_
-        # self.default_report_maker = nr.NewReportMaker(module_, "_")
-        self.default_report_maker = nr.NewReportMaker(self.module_, '_', '_', nr.WEEKLY_MAIL_HANDLERS,
-                                                      report_title="Default Report for module %s, namla: %s" %
-                                                                   (self.module_, self.context.node_name))
+        # self.default_report = nr.NewReportMaker(module_, "_")
+        self.default_report = nr.Report(self.module_, 'default', 'default', nr.WEEKLY_MAIL_HANDLERS,
+                                        report_title="Default Report for module %s, namla: %s" %
+                                                     (self.module_, self.context.node_name))
 
     def get_update(self):
         return nu.Update(self.data.edits)
@@ -43,20 +43,20 @@ class AbstractNamlatJob:
 
     def append_report_entry(self, title, message_body, entry_id=None, actions=None):
         actions = actions or list()
-        self.default_report_maker.append_report_entry(title, message_body, entry_id, actions)
+        self.default_report.append_report_entry(title, message_body, entry_id, actions)
 
     def send_report_entry(self, title, message_body, entry_id=None, actions=None):
         actions = actions or list()
-        self.default_report_maker.send_report_entry(title, message_body, entry_id, actions)
+        self.default_report.send_report_entry(title, message_body, entry_id, actions)
 
     def send_report(self):
-        self.default_report_maker.send_report()
+        self.default_report.send_report()
 
-    def get_report_maker(self, report_id, report_type, handlers,
-                         reporter_node='reporter', report_title=None, report_subtitle="", report_archived=True):
-        return nr.NewReportMaker(self.module_, report_id, report_type, handlers,
-                                 node_name=context.node_name, reporter_node=reporter_node, report_title=report_title,
-                                 report_subtitle=report_subtitle, report_archived=report_archived)
+    def get_report(self, report_id, report_type, handlers, report_title=None, report_subtitle="",
+                   report_append=False, report_archived=True):
+        return nr.Report(self.module_, report_id, report_type, handlers,
+                         node_name=context.node_name, report_title=report_title,
+                         report_subtitle=report_subtitle, report_append=report_append, report_archived=report_archived)
 
     def finished(self):
         pass

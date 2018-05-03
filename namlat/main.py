@@ -3,6 +3,7 @@ import os
 import sys
 from xaled_utils.lockfile import pidlock, release_lock, LockHeld
 from xaled_utils.logs import configure_logging
+from xaled_utils.threads import threaded
 import namlat
 from namlat.api.flask import server_main
 from namlat.config import DATA_DIR, VERSION
@@ -15,6 +16,7 @@ def main():
     parser.add_argument('-y', '--sync', action="store_true", default=False)
     parser.add_argument('--create', action="store_true", default=False)
     parser.add_argument('-f', '--force-create', action="store_true", default=False)
+    parser.add_argument('--no-server-jobs', action="store_true", default=False)
     parser.add_argument('-C', '--cron', action="store_true", default=False)
     parser.add_argument('-d', '--debug', action="store_true", default=False)
     parser.add_argument('-n','--name', action="store", default=None)
@@ -73,11 +75,14 @@ def main():
         if not args.sync and not args.create and not args.server:
             namlat.client_main(args)
         elif args.server:
+            if not args.no_server_jobs:
+                threaded(namlat.client_main, (args,), daemon=True)
             server_main(args)
         elif args.sync:
             namlat.sync_main(args)
         elif args.create:
             namlat.create_main(args)
-        release_lock(args.lock_path)
     except LockHeld:
         print("There is already an instance of this node")
+    finally:
+        release_lock(args.lock_path)

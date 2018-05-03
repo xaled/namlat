@@ -106,7 +106,7 @@ message_server = MessageServer()
 def get_message_recipients(message):
     # hardcoded filtering rules  TODO: Routage, explicit, local, central?
     if message.type == 'report':
-        return [('server', 'namlat.modules.report'), ('reporter', 'namlat.modules.report')]
+        return [('server', 'namlat.modules.report')]
     # other filtering rules:
 
     # else: forward to master or not?

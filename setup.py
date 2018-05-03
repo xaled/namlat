@@ -4,6 +4,9 @@ from distutils.core import setup
 
 import os
 
+with open("namlat/VERSION") as fin:
+    VERSION = fin.read()
+
 
 def package_files(directory):
     paths = []
@@ -20,7 +23,7 @@ extra_files = package_files('namlat/')
 
 setup(
     name='namlat',
-    version="0.1.0rc11",
+    version=VERSION,
     # major.minor.fix: MAJOR incompatible API changes, MINOR add backwards-compatible functionality, FIX bug fixes
     description='Distributed Monitoring and Reporting.',
     long_description='Distributed Monitoring and Reporting.',
@@ -30,7 +33,7 @@ setup(
     author_email='kh.grandi@gmail.com',
     license='GPL3',
     url='https://github.com/xaled/namlat/',
-    install_requires=['requests', 'pycrypto', 'flask', 'jinja2', 'xaled_utils'],
+    install_requires=['requests', 'pycrypto', 'flask', 'jinja2', 'xaled_utils', 'bbcode'],
     python_requires='>=3',
     packages=['namlat'],
     package_data={'': extra_files},

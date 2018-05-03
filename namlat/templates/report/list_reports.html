@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block main_content_body %}
+<div class="row">
+    <div class="col">
+        <div class="table-responsive table-hover">
+            <table class="table">
+                <tbody>
+                {% for r in reports %}
+                <tr>
+                    <th>{{ loop.index }}</th>
+                    <td><a href="{{ r[1:] }}">{{ r }}</a></td>
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- /.row -->
+{% endblock %}

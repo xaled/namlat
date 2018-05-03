@@ -6,7 +6,6 @@ import namlat.report as nr
 import namlat.updates as nu
 from namlat.modules import AbstractNamlatJob
 
-
 logger = _logging.getLogger(__name__)
 
 
@@ -16,12 +15,8 @@ class GitJob(AbstractNamlatJob):
 
     def execute(self):
         logger.info("executing GitJob")
-        # report_maker = nr.NewReportMaker(self.module_, "gitstatus", "Git cron report for host " + self.context.node_name,
-        #                                  handlers=nr.DAILY_MAIL_HANDLERS)
-        # report_maker = nr.NewReportMaker(self.data, self.module_, "gitstatus", "Git cron report for host " + self.context.node_name,
-        #                                  handlers=nr.DAILY_MAIL_HANDLERS)
-        report_maker = self.get_report_maker("gitstatus", "gitstatus", nr.DAILY_MAIL_HANDLERS, report_archived=False,
-                                             report_title="Git cron report for host " + self.context.node_name )
+        report = self.get_report("gitstatus", "gitstatus", nr.DAILY_MAIL_HANDLERS,
+                                 report_title="Git cron report for host " + self.context.node_name)
         for root_dir in self.kwargs['root-dirs']:
             logger.debug("processing root-dir:%s", root_dir)
             sub_dirs = [os.path.join(root_dir, child) for child in os.listdir(root_dir) if
@@ -32,12 +27,12 @@ class GitJob(AbstractNamlatJob):
                     remote_status, remote_message = _get_remote_status(dir)
                     logger.debug("%s: %s", dir, remote_message)
                     if not remote_status:
-                        report_maker.append_report_entry(dir, remote_message)
+                        report.append_report_entry(dir, remote_message)
                     local_satus = _get_local_status(dir)
                     if not local_satus:
-                        report_maker.append_report_entry(dir, 'not all changes are commited')
+                        report.append_report_entry(dir, 'not all changes are commited')
 
-        report_maker.send_report()
+        report.send_report()
 
 
 def _get_cmd_output(command_vector):
@@ -50,12 +45,12 @@ def _git_cmd(dir, cmd, args):
 
 
 def _is_git(dir):
-    return os.path.isdir(os.path.join(dir,'.git'))
+    return os.path.isdir(os.path.join(dir, '.git'))
 
 
 def _get_remote_status(dir):
-    o,ec = _git_cmd(dir, 'remote', ['update'])
-    o,ec = _git_cmd(dir, 'status', ['-uno'])
+    o, ec = _git_cmd(dir, 'remote', ['update'])
+    o, ec = _git_cmd(dir, 'status', ['-uno'])
     line = ''
     for l in o.split('\n'):
         if l.strip().startswith('Your branch'):
@@ -69,9 +64,7 @@ def _get_remote_status(dir):
 
 
 def _get_local_status(dir):
-    o, ec = _git_cmd(dir, 'status',[])
+    o, ec = _git_cmd(dir, 'status', [])
     if 'nothing to commit' in o:
         return True
     return False
-
-

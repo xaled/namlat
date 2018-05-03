@@ -3,7 +3,7 @@
 <h2>{{ report.report_title }}</h2><br>
 <b>{{ report.report_subtitle }}: </b>{{ url }}{{ report.report_uri }}<br>
 <ul>
-    {% for entry in report.entries %}
+    {% for entry in report.report_entries %}
     <li>
         <b>{{ entry.title }}: </b>{{ entry.message_body}}.<br>
     </li>

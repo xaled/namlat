@@ -35,7 +35,7 @@ def client_main(args):
             client.updati(update)
             client.pull()
             update_last_executed(job)
-        if args.cron:
+        if args.cron and not (args.server and not args.no_server_jobs):
             break
         logger.info("sleeping for %ds" % SLEEP)
         sleep(SLEEP)
@@ -82,7 +82,7 @@ def create_main(args):
     localdb = JsonMinConnexion(path=args.localdb_path, template={"jobs": {}, "is_master": is_master,
                                                                 "last_commit_id":"", 'inbox':{}}, indent=None)
     # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
-    context.set_context(data, secret, rsa_key, args.name, config, localdb)
+    context.set_context(data, secret, rsa_key, args.name, config, localdb, args.data_dir)
 
     if not is_master:
         client.create_node(gw, public_key, args.name)
@@ -128,7 +128,7 @@ def get_jobs():
             with context.localdb:
                 if not 'jobs' in context.localdb:
                     context.localdb['jobs'] = {}
-                context.localdb['jobs'][job_id]= {'last_executed':0.0}
+                context.localdb['jobs'][job_id]= {'last_executed': 0.0}
             last_executed = 0.0
         if time() - last_executed > job['period']:
             job_ = dict(job)
@@ -148,7 +148,7 @@ def load_data(args):
         config = JsonMinConnexion(path=args.config_path, create=False)
         localdb = JsonMinConnexion(path=args.localdb_path, create=False, indent=None)
         # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
-        context.set_context(data, secret, rsa_key, args.name, config, localdb)
+        context.set_context(data, secret, rsa_key, args.name, config, localdb, args.data_dir)
     except Exception:
         logger.error("Error loading data args=%s", args, exc_info=True)
         print("if fist time run namlat.py --create name")
