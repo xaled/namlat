@@ -1,44 +1,47 @@
 {% extends "base.html" %}
 {% block main_content_body %}
 <div class="row">
+    <div class="col-md-4">
+        <div class="table-responsive table-hover">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <th>Origin</th>
+                    <td>{{ report.node_name + "/" + report.module_}}</td>
+                </tr>
+                <tr>
+                    <th>Creation time</th>
+                    <td>{{ report.report_timestamp | strftime}}</td>
+                </tr>
+                <tr>
+                    <th>Last append time</th>
+                    <td>{{ report.report_append_timestamp | strftime}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<h5>Entries:</h5>
+<div class="row">
     <div class="col">
         <div class="table-responsive table-hover">
             <table class="table">
                 <thead>
                 <tr>
-                    {% for k in report.__dict__.keys() %}
-                    <th>{{ k }}</th>
-                    {% endfor %}
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    {% for k in report.__dict__.keys() %}
-                    {% if k != 'report_entries' %}
-                    <td>{{ report.__dict__[k] }}</td>
-                    {% endif %}
-                    {% endfor %}
-
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="table-responsive table-hover">
-            <table class="table">
-                <thead>
-                <tr>
-                    {% for k in keys %}
-                    <th>{{ k }}</th>
-                    {% endfor %}
+                    <th style="width: 20%">Time</th>
+                    <th style="width: 20%">Title</th>
+                    <th style="width: 40%">Body</th>
+                    <th style="width: 20%">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for r in report.report_entries %}
                 <tr>
-                    {% for k in keys %}
-                    <td>{{ r.__dict__[k] }}</td>
-                    {% endfor %}
-
+                    <td style="width: 20%">{{ r.timestamp |  strftime}}</td>
+                    <td style="width: 20%">{{ r.title }}</td>
+                    <td style="width: 40%">{{ r.message_body }}</td>
+                    <td style="width: 20%">{{ r.actions }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

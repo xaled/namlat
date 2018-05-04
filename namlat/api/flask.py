@@ -191,3 +191,9 @@ def static_ressource(path):
     # logger.debug("dir: %s", dir)
     # logger.debug("sent: %s, %s", WEB_STATIC_DIR + dir, path)
     return send_from_directory(WEB_STATIC_DIR + dir, path)
+
+
+@app.template_filter('strftime')
+def _jinja2_filter_datetime(date, fmt=None):
+    from xaled_utils.time_ops import epoch_to_iso8601
+    return epoch_to_iso8601(date)

@@ -16,9 +16,9 @@ ALERT_HANDLERS = ["sms_instant", "telegram_instant", "mail_instant"]
 
 
 class Report(JsonSerializable):
-    def __init__(self, module_, report_id, report_type, handlers, node_name=context.node_name, report_title=None,
+    def __init__(self, module_, report_id, report_type, handlers, node_name=None, report_title=None,
                  report_subtitle="", report_append=False, report_archived=True):
-        self.node_name = node_name
+        self.node_name = node_name or context.node_name
         self.module_ = module_
 
         # report
