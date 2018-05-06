@@ -46,14 +46,14 @@ class MailHandler(Handler):
     def make_report(self):
         self.subject = self.period_name + " namlat reports " + time.strftime("%d %b %Y", time.gmtime(time.time()))
         self.mail_body = jinja_env.get_template('mail_report.html').render(reports=self.get_reports(),
-                                                                          subject=self.subject,
-                                                                          url=self.jobargs['server'])
+                                                                           subject=self.subject,
+                                                                           url=self.jobargs['server'])
         logger.debug("MailHandler - subject : %s", self.subject)
         logger.debug("MailHandler - mail_body : %s", self.mail_body)
 
     def send(self):  # TODO:
-        namlat.utils.mail.send_html(self.subject, self.mail_body, self.jobargs['recipient'],
-                                    self.jobargs['gmail_username'], self.jobargs['gmail_password'])
+        namlat.utils.mail.send_html_ex2(self.subject, self.mail_body, self.jobargs['recipient'],
+                                        self.jobargs['gmail_username'], self.jobargs['gmail_password'])
         # pass
 
 

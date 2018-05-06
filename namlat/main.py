@@ -67,9 +67,9 @@ def main():
         args.lock_path = os.path.join(args.data_dir, "%s.lock"%args.name)
 
     if args.debug:
-        configure_logging(level="DEBUG", modules=["xaled_utils", "namlat", "werkzeug"])
+        configure_logging(level="DEBUG", modules=["xaled_utils", "namlat", "werkzeug", "namlat_ext"])
     else:
-        configure_logging(level="INFO", modules=["xaled_utils", "namlat", "werkzeug"])
+        configure_logging(level="INFO", modules=["xaled_utils", "namlat", "werkzeug", "namlat_ext"])
     try:
         pidlock(args.lock_path)
         if not args.sync and not args.create and not args.server:
