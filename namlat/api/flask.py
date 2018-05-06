@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, url_for, render_template, send_from_directory #, json
+from flask import Flask, Response, request, url_for, render_template, send_from_directory  # , json
 import jinja2
 from threading import Lock, Thread
 import xaled_utils.json_serialize as json
@@ -8,9 +8,10 @@ from namlat.updates import get_update_from_request_dict
 from namlat.modules import get_module_route_rules
 import namlat.api.server as server
 import logging
+
 logger = logging.getLogger(__name__)
 
-data_lock = Lock() # Todo: threadsafe only if there is one server/master that is jobless
+data_lock = Lock()  # Todo: threadsafe only if there is one server/master that is jobless
 APP_ROOT = ''
 # CORE_PATH = '/core'
 MODULES_PATH = ''
@@ -73,27 +74,27 @@ def site_map():
 
 @app.route(APP_ROOT + '/namlat/ping', methods=['POST'])
 def ping():
-    with data_lock:
-        logger.debug("received ping request")
-        if 'node_name' in request.form:
-            resp_body = json.dumps({"ping": server.ping(request.form['node_name'])})
-            resp = Response(resp_body, status=200, mimetype='application/json')
-            return resp
-        else:
-            logger.warning("'node_name' param is not in the request data")
-            return error_400()
+    # with data_lock:
+    logger.debug("received ping request")
+    if 'node_name' in request.form:
+        resp_body = json.dumps({"ping": server.ping(request.form['node_name'])})
+        resp = Response(resp_body, status=200, mimetype='application/json')
+        return resp
+    else:
+        logger.warning("'node_name' param is not in the request data")
+        return error_400()
 
 
 @app.route(APP_ROOT + '/namlat/pull', methods=['POST'])
 def pull():
     logger.debug("received pull request")
     try:
-        data_lock.acquire()
-        if 'last_commit_id' in request.form and 'node_name' in request.form:
-            last_commit_id = request.form['last_commit_id']
+        # data_lock.acquire()
+        if 'node_name' in request.form:
+            # last_commit_id = request.form['last_commit_id']
             node_name = request.form['node_name']
-            updates_log, mail_bag = server.pull(last_commit_id, node_name)
-            resp_body = json.dumps({"updates_log": updates_log, "mail_bag": mail_bag})
+            mail_bag = server.pull(node_name)
+            resp_body = json.dumps({"mail_bag": mail_bag})
             resp = Response(resp_body, status=200, mimetype='application/json')
             return resp
         else:
@@ -102,71 +103,70 @@ def pull():
     except Exception as e:
         logger.error("error in pull request: %s", str(e), exc_info=True)
         return error_400()
-    finally:
-        data_lock.release()
+    # finally:
+    #     data_lock.release()
 
 
 @app.route(APP_ROOT + '/namlat/update', methods=['POST'])
 def update():
     logger.debug("received client update")
     try:
-        data_lock.acquire()
-        if 'old_commit_id' in request.form and 'update' in request.form \
-            and 'outgoing_mail' in request.form:
+        # data_lock.acquire()
+        if 'outgoing_mail' in request.form:
             logger.debug("update request: %s", request.form)
 
-            old_commit_id = request.form['old_commit_id']
+            # old_commit_id = request.form['old_commit_id']
             outgoing_mail = json.loads(request.form['outgoing_mail'])
-            update_request_dict = json.loads(request.form['update'])
-            update = get_update_from_request_dict(update_request_dict)
-            commit_id = server.updati(old_commit_id, update, outgoing_mail)
+            # update_request_dict = json.loads(request.form['update'])
+            # update = get_update_from_request_dict(update_request_dict)
+            commit_id = server.updati(outgoing_mail)
             logger.debug("returning commit_id=%s", commit_id)
-            resp_body = json.dumps({"commit_id":commit_id})
+            resp_body = json.dumps({"OK": True})
             resp = Response(resp_body, status=200, mimetype='application/json')
             return resp
         else:
-            logger.warning("'old_commit_id' or 'update' params are not in the request data")
+            logger.warning("'outgoing_mail' params are not in the request data")
             return error_400()
     except Exception as e:
         logger.error("error in update request: %s", str(e), exc_info=True)
         return error_400()
-    finally:
-        data_lock.release()
+    # finally:
+    #     data_lock.release()
 
 
-@app.route(APP_ROOT + '/namlat/sync', methods=['GET'])
-def sync():
-    logger.debug("received client sync")
-    try:
-        data_lock.acquire()
-        sync_data, sync_logs = server.sync()
-        resp_body = json.dumps({'sync_data':sync_data, 'sync_logs':sync_logs})
-        resp = Response(resp_body, status=200, mimetype='application/json')
-        return resp
-    except Exception as e:
-        logger.error("error in update request: %s", str(e), exc_info=True)
-        return error_400()
-    finally:
-        data_lock.release()
+# @app.route(APP_ROOT + '/namlat/sync', methods=['GET'])
+# def sync():
+#     logger.debug("received client sync")
+#     try:
+#         data_lock.acquire()
+#         sync_data, sync_logs = server.sync()
+#         resp_body = json.dumps({'sync_data':sync_data, 'sync_logs':sync_logs})
+#         resp = Response(resp_body, status=200, mimetype='application/json')
+#         return resp
+#     except Exception as e:
+#         logger.error("error in update request: %s", str(e), exc_info=True)
+#         return error_400()
+#     finally:
+#         data_lock.release()
 
 
 @app.route(APP_ROOT + '/namlat/createNode', methods=['POST'])
 def create_node():
-    logger.debug("received client sync")
+    logger.debug("received client createNode")
     try:
-        data_lock.acquire()
-        if 'gw' in request.form and 'public_key' in request.form and 'node_name' in request.form: # and 'address' in request.form \
+        # data_lock.acquire()
+        if 'gw' in request.form and 'public_key' in request.form and 'node_name' in request.form:  # and 'address' in request.form \
             # gw = request.form['gw']
             # address = request.form['address']
             public_key = request.form['public_key']
             node_name = request.form['node_name']
             accepted = server.create_node(public_key, node_name)
-            if accepted:
-                sync_data, sync_logs = server.sync()
-            else:
-                sync_data, sync_logs = None, None
+            # if accepted:
+            #     sync_data, sync_logs = server.sync()
+            # else:
+            #     sync_data, sync_logs = None, None
             # logger.debug("response: %s", {'accepted': accepted, 'sync_data':sync_data, 'sync_logs':sync_logs})
-            resp_body = json.dumps({'accepted': accepted, 'sync_data':sync_data, 'sync_logs':sync_logs})
+            resp_body = json.dumps({'accepted': accepted}) #, 'sync_data': sync_data, 'sync_logs': sync_logs})
             resp = Response(resp_body, status=200, mimetype='application/json')
             return resp
         else:
@@ -175,8 +175,8 @@ def create_node():
     except Exception as e:
         logger.error("error in update request: %s", str(e), exc_info=True)
         return error_400()
-    finally:
-        data_lock.release()
+    # finally:
+        # data_lock.release()
 
 
 @app.route(APP_ROOT + '/plugins/<path:path>')

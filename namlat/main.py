@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--gw', action="store", default=None)
     # parser.add_argument('--logs-path', action="store", default=None)
     parser.add_argument('--cert-path', action="store", default=None)
-    parser.add_argument('--data-path', action="store", default=None)
+    # parser.add_argument('--data-path', action="store", default=None)
     parser.add_argument('--config-path', action="store", default=None)
     parser.add_argument('--secret-path', action="store", default=None)
     parser.add_argument('--localdb-path', action="store", default=None)
@@ -55,8 +55,8 @@ def main():
         args.localdb_path = os.path.join(args.data_dir, "localdb.json")
     # if args.logs_path is None:
     #     args.logs_path = os.path.join(args.data_dir, "logs.json")
-    if args.data_path is None:
-        args.data_path = os.path.join(args.data_dir, "data.json")
+    # if args.data_path is None:
+    #     args.data_path = os.path.join(args.data_dir, "data.json")
     if args.cert_path is None:
         args.cert_path = os.path.join(args.data_dir, "private_key.pem")
     if args.secret_path is None:

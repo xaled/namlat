@@ -26,13 +26,13 @@ def client_main(args):
         jobs = get_jobs()
         logger.debug("len(jobs)=%d", len(jobs))
         for job in jobs:
-            logger.debug("executing job: %s", job)
-            update = execute_job(job)
+            logger.debug("executing job: %s (%s.%s)", job['job_id'], job['module'], job['class'])
+            execute_job(job)
 
-            logger.debug("signing update=%s", update)
-            update.sign(context.rsa_key, context.node_name)
+            # logger.debug("signing update=%s", update)
+            # update.sign(context.rsa_key, context.node_name)
             logger.debug("sending peer update to gw")
-            client.updati(update)
+            client.updati()
             client.pull()
             update_last_executed(job)
         if args.cron and not (args.server and not args.no_server_jobs):
@@ -42,15 +42,16 @@ def client_main(args):
 
 
 def sync_main(args):
-    load_data(args)
-    if client.ping():
-        client.sync()
+    pass
+    # load_data(args)
+    # if client.ping():
+    #     client.sync()
 
 
 def create_main(args):
     # global logs, data, address, rsa_key, context, secret
 
-    for f in [args.data_path, args.secret_path, args.localdb_path, args.cert_path, args.config_path]:
+    for f in [args.secret_path, args.localdb_path, args.cert_path, args.config_path]:
         if os.path.exists(f):
             if args.force_create:
                 logger.warning("file %s already exists. deleting the file!", f)
@@ -59,7 +60,7 @@ def create_main(args):
                 print("file %s already exists! try --force-create option." % f)
                 return
     private_key, public_key = nu.generate_keys()
-    with open(args.cert_path,'w') as fou:
+    with open(args.cert_path, 'w') as fou:
         fou.write(private_key.decode())
     rsa_key = RSA.importKey(open(args.cert_path).read())
     if args.gw is None:
@@ -75,14 +76,14 @@ def create_main(args):
             return
     # address = nu.public_key_address(rsa_key.publickey())
     # logs = JsonMinConnexion(path=args.logs_path, template={'commit_ids': [], 'updates': {}})
-    data = JsonMinConnexion(path=args.data_path, template={'nodes': {},
-                                                           'public_keys': {}}, indent=None)
+    # data = JsonMinConnexion(path=args.data_path, template={'nodes': {},
+    #                                                        'public_keys': {}}, indent=None)
     secret = JsonMinConnexion(path=args.secret_path, template={})
     config = JsonMinConnexion(path=args.config_path, template={"jobs": {}})
     localdb = JsonMinConnexion(path=args.localdb_path, template={"jobs": {}, "is_master": is_master,
-                                                                "last_commit_id":"", 'inbox':{}}, indent=None)
+                                                                 "last_commit_id": "", 'inbox': {}}, indent=None)
     # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
-    context.set_context(data, secret, rsa_key, args.name, config, localdb, args.data_dir)
+    context.set_context(secret, rsa_key, args.name, config, localdb, args.data_dir)
 
     if not is_master:
         client.create_node(gw, public_key, args.name)
@@ -128,7 +129,7 @@ def get_jobs():
             with context.localdb:
                 if not 'jobs' in context.localdb:
                     context.localdb['jobs'] = {}
-                context.localdb['jobs'][job_id]= {'last_executed': 0.0}
+                context.localdb['jobs'][job_id] = {'last_executed': 0.0}
             last_executed = 0.0
         if time() - last_executed > job['period']:
             job_ = dict(job)
@@ -143,12 +144,12 @@ def load_data(args):
         rsa_key = RSA.importKey(open(args.cert_path).read())
         # address = nu.public_key_address(rsa_key.publickey())
         # logs = JsonMinConnexion(path=args.logs_path, create=False)
-        data = JsonMinConnexion(path=args.data_path, create=False, indent=None)
+        # data = JsonMinConnexion(path=args.data_path, create=False, indent=None)
         secret = JsonMinConnexion(path=args.secret_path, create=False)
         config = JsonMinConnexion(path=args.config_path, create=False)
         localdb = JsonMinConnexion(path=args.localdb_path, create=False, indent=None)
         # context.set_context(data, address, secret, logs, rsa_key, args.name, config)
-        context.set_context(data, secret, rsa_key, args.name, config, localdb, args.data_dir)
+        context.set_context(secret, rsa_key, args.name, config, localdb, args.data_dir)
     except Exception:
         logger.error("Error loading data args=%s", args, exc_info=True)
         print("if fist time run namlat.py --create name")
@@ -171,13 +172,3 @@ def load_data(args):
 #     edit_data['jobs'][address] = {}
 #     edit_data['config'][address] = {}
 #     return Update(edit_data.edits)
-
-
-
-
-
-
-
-
-
-

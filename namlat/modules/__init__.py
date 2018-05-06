@@ -24,7 +24,7 @@ class AbstractNamlatJob:
     def __init__(self, module_, class_):
         self.context = context
         self.kwargs = dict()
-        self.data = EditDict(self.context.data)
+        # self.data = EditDict(self.context.data)
         self.module_ = module_
         self.class_ = class_
         # self.default_report = nr.NewReportMaker(module_, "_")
@@ -33,7 +33,8 @@ class AbstractNamlatJob:
                                                      (self.module_, self.context.node_name))
 
     def get_update(self):
-        return nu.Update(self.data.edits)
+        # return nu.Update(self.data.edits)
+        return None
 
     def init_job(self):
         pass

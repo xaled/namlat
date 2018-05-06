@@ -1,6 +1,6 @@
 class NamlatContext:
     def __init__(self):
-        self.data = None
+        # self.data = None
         self.secret = None
         self.rsa_key = None
         self.node_name = None
@@ -8,8 +8,8 @@ class NamlatContext:
         self.localdb = None
         self.data_dir = None
 
-    def set_context(self, data, secret, rsa_key, node_name, config, localdb, data_dir):  # address, logs
-        self.data = data
+    def set_context(self, secret, rsa_key, node_name, config, localdb, data_dir):  # address, logs
+        # self.data = data
         self.secret = secret
         self.rsa_key = rsa_key
         self.node_name = node_name

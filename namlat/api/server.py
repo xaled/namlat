@@ -18,42 +18,44 @@ def ping(node_name):
     return True
 
 
-def pull(last_commit_id, node_name):
-    updates_log = dict()
-    if last_commit_id in context.localdb['logs']['commit_ids']:
-        _index = context.localdb['logs']['commit_ids'].index(last_commit_id)
-        updates_log['commit_ids'] = context.localdb['logs']['commit_ids'][_index+1:]
-        updates_log['updates'] = dict()
-        for commit_id in updates_log['commit_ids']:
-            updates_log['updates'][commit_id] = context.localdb['logs']['updates'][commit_id]
-        return updates_log, message_server.get_mail_bag(node_name)
-    else:
-        return None, []
+def pull(node_name):
+    # updates_log = dict()
+    # if last_commit_id in context.localdb['logs']['commit_ids']:
+    #     _index = context.localdb['logs']['commit_ids'].index(last_commit_id)
+    #     updates_log['commit_ids'] = context.localdb['logs']['commit_ids'][_index+1:]
+    #     updates_log['updates'] = dict()
+    #     for commit_id in updates_log['commit_ids']:
+    #         updates_log['updates'][commit_id] = context.localdb['logs']['updates'][commit_id]
+    #     return updates_log, message_server.get_mail_bag(node_name)
+    # else:
+    #     return None, []
+    return message_server.get_mail_bag(node_name)
 
 
-def updati(old_commit_id, update, outgoing_mail):
+def updati( outgoing_mail):
     # logger.debug("received update outgoing_mail: %s", outgoing_mail)
     for recipient in outgoing_mail:
         for message in outgoing_mail[recipient]:
             message_server.receive(message, forward=True)
 
-    if not update.check_signature(context.data['public_keys']):
-        logger.warning("Bad signature")
-        return
-    if context.localdb['logs']['commit_ids'][-1] != old_commit_id:
-        return None
-        # conflicts = check_conflicts(old_commit_id, update)
-        # if len(conflicts) != 0:
-        #     logger.warning("conflicts in update")
-        #     report_conflicts(conflicts)
-        #     return None  # TODOO: what to return when fail
-    commit_id = calculate_commit_id(update)
-    apply_update(update, commit_id, server=True)
-    return commit_id
+    # if not update.check_signature(context.data['public_keys']):
+    #     logger.warning("Bad signature")
+    #     return
+    # if context.localdb['logs']['commit_ids'][-1] != old_commit_id:
+    #     return None
+    #     # conflicts = check_conflicts(old_commit_id, update)
+    #     # if len(conflicts) != 0:
+    #     #     logger.warning("conflicts in update")
+    #     #     report_conflicts(conflicts)
+    #     #     return None  # TODOO: what to return when fail
+    # commit_id = calculate_commit_id(update)
+    # apply_update(update, commit_id, server=True)
+    # return commit_id
 
 
 def sync():
-    return context.data.db, context.localdb['logs']
+    # return context.data.db, context.localdb['logs']
+    pass
 
 
 # def check_conflicts(old_commit_id, update):
@@ -91,21 +93,26 @@ def create_server(public_key, node_name):
 
 
 def _create_node(public_key, node_name):
-    edit_data = EditDict(context.data)
-    # edit_data['inbox'][node_name] = []
-    # with context.localdb:
-    #     context.localdb['inbox'][node_name] = []
-    try:
-        edit_data['public_keys'][node_name] = public_key.decode()
-    except:
-        edit_data['public_keys'][node_name] = public_key
-    # edit_data['jobs'][address] = {}
-    # if gw is None:
-    #     edit_data['config'][address] = {}
-    # else:
-    #     edit_data['config'][address] = {'gw': gw}
-    edit_data['nodes'][node_name] = {'name': node_name}
-    update = Update(edit_data.edits)
-    update.sign(context.rsa_key, context.node_name)
-    commit_id = calculate_commit_id(update)
-    apply_update(update, commit_id, no_check=True, server=True)
+    # edit_data = EditDict(context.data)
+    # # edit_data['inbox'][node_name] = []
+    # # with context.localdb:
+    # #     context.localdb['inbox'][node_name] = []
+    # try:
+    #     edit_data['public_keys'][node_name] = public_key.decode()
+    # except:
+    #     edit_data['public_keys'][node_name] = public_key
+    # # edit_data['jobs'][address] = {}
+    # # if gw is None:
+    # #     edit_data['config'][address] = {}
+    # # else:
+    # #     edit_data['config'][address] = {'gw': gw}
+    # edit_data['nodes'][node_name] = {'name': node_name}
+    # update = Update(edit_data.edits)
+    # update.sign(context.rsa_key, context.node_name)
+    # commit_id = calculate_commit_id(update)
+    # apply_update(update, commit_id, no_check=True, server=True)
+    with context.localdb:
+        if 'nodes' not in context.localdb:
+            context.localdb['nodes'] = {}
+        if node_name not in context.localdb['nodes']:
+            context.localdb['nodes'][node_name] = {'node_name': node_name, 'public_key': public_key}
