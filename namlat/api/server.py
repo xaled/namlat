@@ -2,9 +2,6 @@ import logging
 # import json
 import time
 from namlat.context import context
-from namlat.api.common import apply_update, calculate_commit_id
-from namlat.utils.edits_dict import EditDict
-from namlat.updates import Update
 from namlat.updates.message_server import message_server
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,6 @@ from threading import Lock, Thread
 import xaled_utils.json_serialize as json
 from namlat.config import JINJA2_TEMPLATE_DIR, WEB_STATIC_DIR
 from namlat.context import context
-from namlat.updates import get_update_from_request_dict
 from namlat.modules import get_module_route_rules
 import namlat.api.server as server
 import logging

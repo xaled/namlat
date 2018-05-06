@@ -1,7 +1,6 @@
 import logging
 from namlat.context import context
-from namlat.api.common import apply_update, apply_updates_log, calculate_commit_id, apply_sync_data
-from namlat.api.requests import pull_request, update_request, sync_request, create_node_request, ping_request
+from namlat.api.requests import pull_request, update_request, create_node_request, ping_request
 from namlat.updates.message_server import message_server
 logger = logging.getLogger(__name__)
 
