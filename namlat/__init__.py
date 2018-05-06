@@ -31,7 +31,7 @@ def client_main(args):
 
             # logger.debug("signing update=%s", update)
             # update.sign(context.rsa_key, context.node_name)
-            logger.debug("sending peer update to gw")
+            # logger.debug("sending peer update to gw")
             client.updati()
             client.pull()
             update_last_executed(job)
@@ -94,8 +94,8 @@ def create_main(args):
 
 
 def update_last_executed(job):
-    context.localdb['jobs'][job['job_id']]['last_executed'] = time()
-    context.localdb.save()
+    with context.localdb:
+        context.localdb['jobs'][job['job_id']]['last_executed'] = time()
 
 
 def execute_job(job):
@@ -123,14 +123,13 @@ def get_jobs():
     jobs = list()
     for job_id in context.config['jobs']:
         job = context.config['jobs'][job_id]
-        try:
-            last_executed = context.localdb['jobs'][job_id]['last_executed']
-        except:
-            with context.localdb:
-                if not 'jobs' in context.localdb:
-                    context.localdb['jobs'] = {}
+        with context.localdb:
+            if 'jobs' not in context.localdb:
+                context.localdb['jobs'] = {}
+            if job_id not in context.localdb['jobs']:
                 context.localdb['jobs'][job_id] = {'last_executed': 0.0}
-            last_executed = 0.0
+            last_executed = context.localdb['jobs'][job_id]['last_executed']
+
         if time() - last_executed > job['period']:
             job_ = dict(job)
             job_['job_id'] = job_id
