@@ -15,14 +15,15 @@ with context.localdb:
         context.localdb['modules'][__name__] = {}
 module_db = context.localdb['modules'][__name__]
 BACKUP_DIR = os.path.join(NAMLAT_HOME_DIR, "backup")
-os.makedirs(BACKUP_DIR)
+if not os.path.exists(BACKUP_DIR):
+    os.makedirs(BACKUP_DIR)
 
 
 class BackupJob(AbstractNamlatJob):
     def execute(self):
         logger.info("BackupJob")
         report = self.get_report("default", "default", self.kwargs['notify_handlers'],
-                                 report_title="Backup executions" + self.context.node_name)
+                                 report_title="Backup executions for host: " + self.context.node_name)
         with context.localdb:
             if self.kwargs['period'] not in module_db:
                 module_db[self.kwargs['period']] = {"last_backup": -1}
@@ -41,6 +42,7 @@ class BackupJob(AbstractNamlatJob):
         except:
             logger.error("Error while executing Backup")
             report.append_report_entry("Error while executing Backup.", "")
+        finally:
             with context.localdb:
                 period_object["last_backup"] = new_backup
         report.send_report()

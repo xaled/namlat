@@ -27,17 +27,17 @@ class GitJob(AbstractNamlatJob):
                     remote_status, remote_message = _get_remote_status(dir)
                     logger.debug("%s: %s", dir, remote_message)
                     if not remote_status:
-                        report.append_report_entry(dir, remote_message)
+                        report.append_report_entry(dir, 'remote: ' + remote_message)
                     local_satus = _get_local_status(dir)
                     if not local_satus:
-                        report.append_report_entry(dir, 'not all changes are commited')
+                        report.append_report_entry(dir, 'local: not all changes are commited')
 
         report.send_report()
 
 
 def _get_cmd_output(command_vector):
     o, ec = subprocess.Popen(command_vector, stdout=subprocess.PIPE).communicate()
-    return str(o), ec
+    return o.decode(errors="replace"), ec
 
 
 def _git_cmd(dir, cmd, args):
