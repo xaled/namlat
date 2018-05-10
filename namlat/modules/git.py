@@ -15,7 +15,7 @@ class GitJob(AbstractNamlatJob):
 
     def execute(self):
         logger.info("executing GitJob")
-        report = self.get_report("gitstatus", "gitstatus", nr.DAILY_MAIL_HANDLERS,
+        report = self.get_report("gitstatus", "gitstatus", self.kwargs['notify_handlers'],
                                  report_title="Git cron report for host " + self.context.node_name)
         for root_dir in self.kwargs['root-dirs']:
             logger.debug("processing root-dir:%s", root_dir)

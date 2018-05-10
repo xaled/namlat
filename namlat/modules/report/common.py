@@ -4,7 +4,7 @@ import logging as _logging
 from namlat.context import context
 from namlat.modules import get_mail
 import uuid
-from xaled_utils.json_min_db import JsonMinConnexion
+from easilyb.json_min_db import JsonMinConnexion
 logger = _logging.getLogger(__name__)
 with context.localdb:
     if 'modules' not in context.localdb:

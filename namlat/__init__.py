@@ -3,7 +3,7 @@ from Crypto.PublicKey import RSA
 from time import sleep, time
 import os
 import importlib
-from xaled_utils.json_min_db import JsonMinConnexion
+from easilyb.json_min_db import JsonMinConnexion
 import logging
 from namlat.context import context
 from namlat.config import SLEEP
@@ -95,6 +95,10 @@ def create_main(args):
 
 def update_last_executed(job):
     with context.localdb:
+        if not 'jobs' in context.localdb:
+            context.localdb['jobs'] = dict()
+        if not job['job_id']in context.localdb['jobs']:
+            context.localdb['jobs'][job['job_id']] = {'last_executed': 0.0}
         context.localdb['jobs'][job['job_id']]['last_executed'] = time()
 
 

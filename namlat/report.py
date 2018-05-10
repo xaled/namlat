@@ -2,7 +2,7 @@ import uuid
 import logging as _logging
 from namlat.context import context
 from namlat.updates.messages import Message
-from xaled_utils.json_serialize import JsonSerializable
+from easilyb.json_serialize import JsonSerializable
 import time
 
 logger = _logging.getLogger(__name__)

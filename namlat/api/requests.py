@@ -1,6 +1,6 @@
 import requests
 # import json
-import xaled_utils.json_serialize as json
+import easilyb.json_serialize as json
 import logging
 
 logger = logging.getLogger(__name__)

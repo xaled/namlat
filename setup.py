@@ -33,7 +33,7 @@ setup(
     author_email='kh.grandi@gmail.com',
     license='GPL3',
     url='https://github.com/xaled/namlat/',
-    install_requires=['requests', 'pycrypto', 'flask', 'jinja2', 'xaled_utils', 'bbcode'],
+    install_requires=['requests', 'pycrypto', 'flask', 'jinja2', 'easilyb', 'bbcode'],
     python_requires='>=3',
     packages=['namlat'],
     package_data={'': extra_files},

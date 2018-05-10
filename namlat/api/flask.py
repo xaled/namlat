@@ -1,7 +1,7 @@
 from flask import Flask, Response, request, url_for, render_template, send_from_directory  # , json
 import jinja2
 from threading import Lock, Thread
-import xaled_utils.json_serialize as json
+import easilyb.json_serialize as json
 from namlat.config import JINJA2_TEMPLATE_DIR, WEB_STATIC_DIR
 from namlat.context import context
 from namlat.modules import get_module_route_rules
@@ -194,5 +194,5 @@ def static_ressource(path):
 
 @app.template_filter('strftime')
 def _jinja2_filter_datetime(date, fmt=None):
-    from xaled_utils.time_ops import epoch_to_iso8601
+    from easilyb.time_ops import epoch_to_iso8601
     return epoch_to_iso8601(date)

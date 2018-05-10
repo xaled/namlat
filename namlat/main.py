@@ -1,9 +1,9 @@
 import argparse
 import os
 import sys
-from xaled_utils.lockfile import pidlock, release_lock, LockHeld
-from xaled_utils.logs import configure_logging
-from xaled_utils.threads import threaded
+from easilyb.lockfile import pidlock, release_lock, LockHeld
+from easilyb.logs import configure_logging
+from easilyb.threads import threaded
 import namlat
 from namlat.api.flask import server_main
 from namlat.config import DATA_DIR, VERSION
@@ -67,9 +67,9 @@ def main():
         args.lock_path = os.path.join(args.data_dir, "%s.lock"%args.name)
 
     if args.debug:
-        configure_logging(level="DEBUG", modules=["xaled_utils", "namlat", "werkzeug", "namlat_ext"])
+        configure_logging(level="DEBUG", modules=["easilyb", "namlat", "werkzeug", "namlat_ext"])
     else:
-        configure_logging(level="INFO", modules=["xaled_utils", "namlat", "werkzeug", "namlat_ext"])
+        configure_logging(level="INFO", modules=["easilyb", "namlat", "werkzeug", "namlat_ext"])
     try:
         pidlock(args.lock_path)
         if not args.sync and not args.create and not args.server:
